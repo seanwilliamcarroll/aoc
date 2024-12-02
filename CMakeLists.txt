@@ -25,4 +25,5 @@ add_compile_options(-Wall)
 # set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
 add_subdirectory(d01)
+add_subdirectory(d02)
 
