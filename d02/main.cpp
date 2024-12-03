@@ -1,8 +1,10 @@
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <_stdlib.h>  // for abs
+#include <cmath>      // IWYU pragma: keep
+#include <cstdlib>    // for size_t
+#include <fstream>    // for basic_ostream, basic_istream, endl, operator<<
+#include <iostream>   // for cout, cerr
+#include <string>     // for char_traits, stoi, string
+#include <vector>     // for vector
 
 std::vector<std::vector<int>> get_lists_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);

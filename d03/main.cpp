@@ -1,10 +1,10 @@
-#include <cctype>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <_ctype.h>  // for isdigit
+#include <cctype>    // for isdigit
+#include <cstddef>   // for size_t
+#include <fstream>   // for basic_ostream, endl, operator<<, basic_ifstream
+#include <iostream>  // for cout, cerr
+#include <sstream>   // for basic_stringstream, stringstream
+#include <string>    // for char_traits, allocator, string, stoi
 
 std::stringstream get_content_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);

@@ -1,11 +1,13 @@
-#include <algorithm>
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include <_stdlib.h>      // for abs
+#include <algorithm>      // for sort
+#include <cmath>          // for abs
+#include <cstdlib>        // for size_t
+#include <fstream>        // for basic_ostream, endl, operator<<, basic_istream
+#include <iostream>       // for cout, cerr
+#include <string>         // for char_traits, string
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for make_pair, pair
+#include <vector>         // for vector
 
 std::pair<std::vector<int>, std::vector<int>>
 get_two_lists_from_file(const std::string &filepath) {

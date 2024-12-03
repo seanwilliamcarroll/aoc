@@ -6,4 +6,5 @@ add_executable(d03-exe main.cpp)
 set_target_properties(d03-exe
   PROPERTIES
   OUTPUT_NAME d03
+  CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options}
 )
