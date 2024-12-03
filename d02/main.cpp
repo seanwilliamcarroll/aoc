@@ -1,14 +1,14 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
 #include <cmath>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
 
-std::vector<std::vector<int>> get_lists_from_file(const std::string& filepath) {
+std::vector<std::vector<int>> get_lists_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
 
   std::vector<std::vector<int>> output;
-  
+
   for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
     std::vector<int> line_vec;
     size_t pos = 0;
@@ -25,11 +25,11 @@ std::vector<std::vector<int>> get_lists_from_file(const std::string& filepath) {
 constexpr bool SAFE = true;
 constexpr bool UNSAFE = false;
 
-bool is_safe(const std::vector<int>& list) {
+bool is_safe(const std::vector<int> &list) {
   int last_val = 0;
   bool all_increasing = SAFE;
   bool all_decreasing = SAFE;
-  
+
   for (size_t index = 0; index < list.size(); ++index) {
     if (index == 0) {
       last_val = list[index];
@@ -51,16 +51,16 @@ bool is_safe(const std::vector<int>& list) {
   return all_increasing || all_decreasing;
 }
 
-bool is_safe_with_dampener(const std::vector<int>& list) {
+bool is_safe_with_dampener(const std::vector<int> &list) {
   if (is_safe(list)) {
     return SAFE;
   }
-  
+
   std::vector<int> list_copy;
   list_copy.reserve(list.size());
 
-  
-  for (size_t index_to_remove = 0; index_to_remove < list.size(); ++index_to_remove) {
+  for (size_t index_to_remove = 0; index_to_remove < list.size();
+       ++index_to_remove) {
     for (size_t index = 0; index < list.size(); ++index) {
       if (index == index_to_remove) {
         continue;
@@ -75,8 +75,7 @@ bool is_safe_with_dampener(const std::vector<int>& list) {
   return UNSAFE;
 }
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -84,17 +83,16 @@ int main(int argc, char* argv[]) {
   auto lists = get_lists_from_file(argv[1]);
 
   int accumulator = 0;
-  for (const auto& list : lists) {
+  for (const auto &list : lists) {
     accumulator += int(is_safe(list));
-  }  
+  }
   std::cout << "Num Safe: " << accumulator << std::endl;
 
   accumulator = 0;
-  for (const auto& list : lists) {
+  for (const auto &list : lists) {
     accumulator += int(is_safe_with_dampener(list));
   }
   std::cout << "Num Safe with dampener: " << accumulator << std::endl;
 
-  
   return 0;
 }

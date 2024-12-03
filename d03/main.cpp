@@ -1,12 +1,12 @@
-#include <iostream>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <cmath>
 #include <cctype>
+#include <cmath>
+#include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
 
-std::stringstream get_content_from_file(const std::string& filepath) {
+std::stringstream get_content_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
 
   std::stringstream output;
@@ -16,12 +16,12 @@ std::stringstream get_content_from_file(const std::string& filepath) {
   return output;
 }
 
-std::size_t get_next_valid_digit(const std::string& input, size_t pos) {
+std::size_t get_next_valid_digit(const std::string &input, size_t pos) {
 
   size_t num_digits{};
 
   std::string output_str;
-  
+
   while (num_digits < 3 && std::isdigit(input[pos + num_digits])) {
     output_str.push_back(input[pos + num_digits]);
     ++num_digits;
@@ -29,7 +29,7 @@ std::size_t get_next_valid_digit(const std::string& input, size_t pos) {
   return num_digits;
 }
 
-int calculate_muls(const std::string& input, bool enable_do = false) {
+int calculate_muls(const std::string &input, bool enable_do = false) {
   size_t pos{};
 
   int output = 0;
@@ -69,7 +69,7 @@ int calculate_muls(const std::string& input, bool enable_do = false) {
         continue;
       }
     }
-    
+
     if (next_mul == std::string::npos) {
       return output;
     }
@@ -86,7 +86,6 @@ int calculate_muls(const std::string& input, bool enable_do = false) {
       continue;
     }
     ++pos;
-
 
     num_digits = get_next_valid_digit(input, pos);
     if (num_digits == 0) {
@@ -107,7 +106,7 @@ int calculate_muls(const std::string& input, bool enable_do = false) {
   return output;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -120,8 +119,8 @@ int main(int argc, char* argv[]) {
   std::cout << "First part sum: " << accumulator << std::endl;
 
   accumulator = calculate_muls(file_stream.str(), true);
-  
+
   std::cout << "First part sum: " << accumulator << std::endl;
-  
+
   return 0;
 }
