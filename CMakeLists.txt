@@ -26,4 +26,5 @@ add_compile_options(-Wall)
 
 add_subdirectory(d01)
 add_subdirectory(d02)
+add_subdirectory(d03)
 
