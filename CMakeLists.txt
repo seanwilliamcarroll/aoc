@@ -27,4 +27,5 @@ set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTOR
 add_subdirectory(d01)
 add_subdirectory(d02)
 add_subdirectory(d03)
+add_subdirectory(d04)
 
