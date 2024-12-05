@@ -106,6 +106,50 @@ void print_page_order(const PageOrder &page_order) {
   std::cout << std::endl;
 }
 
+std::pair<PageOrders, PageOrders>
+find_valid_and_invalid_page_orders(const PageOrders &page_orders,
+                                   const AllRules &all_rules) {
+  PageOrders valid_page_orders;
+  PageOrders invalid_page_orders;
+
+  for (const auto &page_order : page_orders) {
+    RuleSet seen_so_far;
+    bool is_valid = true;
+    for (const auto page_number : page_order) {
+      // Get all pages that cannot come before this page, see if we've seen them
+      // yet
+      auto rule_iter = all_rules.find(page_number);
+      if (rule_iter == all_rules.end()) {
+        // No rule, keep going
+        seen_so_far.insert(page_number);
+        continue;
+      }
+      const auto rule_set = rule_iter->second;
+      for (const auto previous_page : seen_so_far) {
+        if (rule_set.count(previous_page) > 0) {
+          is_valid = false;
+          break;
+        }
+      }
+      if (!is_valid) {
+        break;
+      }
+
+      // Insert our page
+      seen_so_far.insert(page_number);
+    }
+
+    // Sum middle element if valid
+    if (is_valid) {
+      valid_page_orders.push_back(page_order);
+    } else {
+      invalid_page_orders.push_back(page_order);
+    }
+  }
+
+  return std::make_pair(valid_page_orders, invalid_page_orders);
+}
+
 PageOrders fix_invalid_page_orders(const PageOrders &page_orders,
                                    const AllRules &all_rules) {
   PageOrders valid_page_orders;
@@ -144,6 +188,16 @@ PageOrders fix_invalid_page_orders(const PageOrders &page_orders,
   return valid_page_orders;
 }
 
+int sum_middle_pages(const PageOrders &page_orders) {
+  int accumulator = 0;
+
+  for (const auto &page_order : page_orders) {
+    accumulator += page_order[page_order.size() / 2];
+  }
+
+  return accumulator;
+}
+
 int main(int argc, char *argv[]) {
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
@@ -156,54 +210,17 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Num page orders: " << page_orders.size() << std::endl;
 
-  int accumulator = 0;
+  const auto [valid_page_orders, invalid_page_orders] =
+      find_valid_and_invalid_page_orders(page_orders, all_rules);
 
-  PageOrders invalid_page_orders;
-
-  for (const auto &page_order : page_orders) {
-    RuleSet seen_so_far;
-    bool is_valid = true;
-    for (const auto page_number : page_order) {
-      // Get all pages that cannot come before this page, see if we've seen them
-      // yet
-      auto rule_iter = all_rules.find(page_number);
-      if (rule_iter == all_rules.end()) {
-        // No rule, keep going
-        seen_so_far.insert(page_number);
-        continue;
-      }
-      const auto rule_set = rule_iter->second;
-      for (const auto previous_page : seen_so_far) {
-        if (rule_set.count(previous_page) > 0) {
-          is_valid = false;
-          break;
-        }
-      }
-      if (!is_valid) {
-        break;
-      }
-
-      // Insert our page
-      seen_so_far.insert(page_number);
-    }
-
-    // Sum middle element if valid
-    if (is_valid) {
-      accumulator += page_order[page_order.size() / 2];
-    } else {
-      invalid_page_orders.push_back(page_order);
-    }
-  }
+  int accumulator = sum_middle_pages(valid_page_orders);
 
   std::cout << "Sum for part 1: " << accumulator << std::endl;
 
   PageOrders fixed_page_orders =
       fix_invalid_page_orders(invalid_page_orders, all_rules);
 
-  accumulator = 0;
-  for (const auto &page_order : fixed_page_orders) {
-    accumulator += page_order[page_order.size() / 2];
-  }
+  accumulator = sum_middle_pages(fixed_page_orders);
 
   std::cout << "Sum for part 2: " << accumulator << std::endl;
 
