@@ -30,4 +30,5 @@ add_subdirectory(d03)
 add_subdirectory(d04)
 add_subdirectory(d05)
 add_subdirectory(d06)
+add_subdirectory(d07)
 
