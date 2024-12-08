@@ -95,10 +95,9 @@ bool is_in_bounds(const AntennaMap &antenna_map, const Position &position) {
 int count_unique_antinode_positions(const AntennaMap &antenna_map,
                                     const bool is_part_2 = false) {
   std::set<Position> unique_positions;
-
   const AntennaPositions antenna_positions = get_antenna_positions(antenna_map);
 
-  for (const auto &[antenna, positions] : antenna_positions) {
+  for (const auto &[_, positions] : antenna_positions) {
     for (size_t base_index = 0; base_index < positions.size(); ++base_index) {
       for (size_t second_index = 0; second_index < positions.size();
            ++second_index) {
