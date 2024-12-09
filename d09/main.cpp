@@ -1,8 +1,9 @@
+#include <deque>    // for deque, __deque_iterator
 #include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
 #include <iostream> // for cout, cerr
 #include <stddef.h> // for size_t
 #include <string>   // for char_traits, string
-#include <utility>  // for swap, make_pair, pair
+#include <utility>  // for pair, make_pair, swap
 #include <vector>   // for vector
 
 using NumBlocks = unsigned long long;
@@ -12,6 +13,13 @@ using FileId = long long;
 using DefragMap = std::vector<NumBlocks>;
 
 using DiskLayout = std::vector<FileId>;
+
+using Index = long long;
+using Length = long long;
+
+using SpanPosition = std::pair<Index, Length>;
+
+using SpanPositions = std::deque<SpanPosition>;
 
 DefragMap get_defrag_map_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
@@ -105,8 +113,6 @@ void print_layout(const DiskLayout &layout) {
 NumBlocks get_part_1_checksum(const DefragMap &defrag_map) {
   DiskLayout layout = get_layout(defrag_map);
 
-  // print_layout(layout);
-
   size_t begin_index{};
   size_t end_index = layout.size() - 1;
   while (begin_index < end_index) {
@@ -121,97 +127,96 @@ NumBlocks get_part_1_checksum(const DefragMap &defrag_map) {
     }
   }
 
-  // print_layout(layout);
-
   NumBlocks checksum = calc_checksum(layout);
 
   return checksum;
 }
 
+std::pair<SpanPositions, SpanPositions>
+get_file_and_free_positions(const DefragMap &defrag_map) {
+  SpanPositions file_span_positions;
+  SpanPositions free_span_positions;
+  Index current_position{};
+  for (size_t index = 0; index < defrag_map.size(); ++index) {
+    if (index % 2 == 0) {
+      file_span_positions.emplace_back(current_position, defrag_map[index]);
+    } else {
+      free_span_positions.emplace_back(current_position, defrag_map[index]);
+    }
+    current_position += defrag_map[index];
+  }
+  return std::make_pair(file_span_positions, free_span_positions);
+}
+
+bool try_merge(SpanPositions &free_span_positions, Index free_index) {
+  auto &[free_start_index, free_length] = free_span_positions[free_index];
+  if (free_index == 0) {
+    return false;
+  }
+  auto &[last_free_start_index, last_free_length] =
+      free_span_positions[free_index - 1];
+  if (last_free_start_index + last_free_length == free_start_index) {
+    last_free_length += free_length;
+    free_span_positions.erase(free_span_positions.begin() + free_index);
+    return true;
+  }
+  return false;
+}
+
+bool try_remove_zero(SpanPositions &free_span_positions, Index free_index) {
+  auto [_, free_length] = free_span_positions[free_index];
+  if (free_length == 0) {
+    free_span_positions.erase(free_span_positions.begin() + free_index);
+    return true;
+  }
+  return false;
+}
+
+void do_swap(DiskLayout &layout, Index file_start_index, Length file_length,
+             Index free_start_index) {
+  for (Index index = 0; index < file_length; ++index) {
+    std::swap(layout[file_start_index + index],
+              layout[free_start_index + index]);
+  }
+}
+
 NumBlocks get_part_2_checksum(const DefragMap &defrag_map) {
   DiskLayout layout = get_layout(defrag_map);
 
-  // print_layout(layout);
+  auto [file_span_positions, free_span_positions] =
+      get_file_and_free_positions(defrag_map);
 
-  FileId end_index = layout.size() - 1;
-  FileId current_id;
-  bool found_ids = false;
-  while (end_index > 0) {
-    // Find next file
-    if (layout[end_index] < 0) {
-      --end_index;
-      continue;
-    }
-    if (!found_ids) {
-      current_id = layout[end_index];
-      found_ids = true;
-    } else {
-      if (layout[end_index] != current_id - 1) {
-        --end_index;
+  for (Index file_id = file_span_positions.size() - 1; file_id >= 0;
+       --file_id) {
+    const auto [file_start_index, file_length] = file_span_positions[file_id];
+    Index free_index = 0;
+    while (free_index < free_span_positions.size()) {
+      if (try_remove_zero(free_span_positions, free_index)) {
+        // stay on this index
         continue;
       }
-      current_id = layout[end_index];
-    }
-    // std::cout << "Current file: " << current_id << std::endl;
-    // Found file
-    FileId start_block_index(end_index);
-    while (layout[end_index] == layout[start_block_index] &&
-           start_block_index >= 0) {
-      --start_block_index;
-    }
-    ++start_block_index;
-    FileId length = end_index - start_block_index + 1;
-    // std::cout << "Id: " << layout[start_block_index] << " ["
-    //           << start_block_index << ", " << end_index
-    //           << "] Length: " << length << std::endl;
-
-    // Find large enough free space
-    FileId start_free_index = 0;
-    bool did_swap = false;
-    while (!did_swap && start_free_index < start_block_index) {
-      if (layout[start_free_index] >= 0) {
-        ++start_free_index;
+      if (try_merge(free_span_positions, free_index)) {
+        // Need to go back one for the merge
+        free_index -= 1;
         continue;
       }
-      // Found free space, get length
-      FileId end_free_index(start_free_index);
-      while (layout[end_free_index] < 0) {
-        ++end_free_index;
-      }
-      --end_free_index;
-
-      if ((end_free_index - start_free_index + 1) >= length) {
-        for (FileId index = 0; index < length; ++index) {
-          // if (layout[start_free_index + index] >= 0) {
-          //   std::cout << "ERROR" << std::endl;
-          // }
-          // if (layout[start_block_index + index] < 0) {
-          //   std::cout << "ERROR" << std::endl;
-          // }
-          std::swap(layout[start_free_index + index],
-                    layout[start_block_index + index]);
-        }
-        did_swap = true;
-        // std::cout << "SWAPPED: " << current_id << " from: ["
-        //           << start_block_index << ", " << end_index << "] to ["
-        //           << start_free_index << ", " << end_free_index << "]"
-        //           << std::endl;
+      auto &[free_start_index, free_length] = free_span_positions[free_index];
+      if (free_start_index > file_start_index) {
+        // we want to move things forward only
         break;
-      } else {
-        // Continue
-        start_free_index = end_free_index + 1;
       }
+      if (file_length > free_length) {
+        // not big enough
+        ++free_index;
+        continue;
+      }
+      // found a space we can swap with
+      do_swap(layout, file_start_index, file_length, free_start_index);
+      free_start_index = free_start_index + file_length;
+      free_length = free_length - file_length;
+      break;
     }
-    // if (did_swap) {
-    //   // std::cout << "SWAPPED: " << current_id << std::endl;
-    // } else {
-    //   std::cout << "NO SWAP: " << current_id << " length: " << length
-    //             << std::endl;
-    // }
-    end_index = start_block_index - 1;
   }
-
-  // print_layout(layout);
 
   NumBlocks checksum = calc_checksum(layout);
 
@@ -225,8 +230,6 @@ int main(int argc, char *argv[]) {
   }
 
   const auto defrag_map = get_defrag_map_from_file(argv[1]);
-
-  // print_defrag_map(defrag_map);
 
   NumBlocks accumulator = get_part_1_checksum(defrag_map);
 
