@@ -69,7 +69,7 @@ Positions get_trailend_positions(const ElevationMap &elev_map,
   std::deque<Position> locations_to_check;
 
   locations_to_check.push_back(trailhead);
-  
+
   while (!locations_to_check.empty()) {
     const auto [start_row, start_col] = locations_to_check.front();
     locations_to_check.pop_front();
