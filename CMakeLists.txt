@@ -19,12 +19,13 @@ set(iwyu_path_and_options
     -Xiwyu
     --error)
 
-add_compile_options(-Wall)
+add_compile_options(-Wall -Werror)
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
 
 set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options})
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
-# add_subdirectory(visualize)
 add_subdirectory(d01)
 add_subdirectory(d02)
 add_subdirectory(d03)
@@ -37,3 +38,4 @@ add_subdirectory(d09)
 add_subdirectory(d10)
 add_subdirectory(d11)
 
+# add_subdirectory(term_app)
