@@ -37,5 +37,6 @@ add_subdirectory(d08)
 add_subdirectory(d09)
 add_subdirectory(d10)
 add_subdirectory(d11)
+add_subdirectory(d12)
 
 # add_subdirectory(term_app)
