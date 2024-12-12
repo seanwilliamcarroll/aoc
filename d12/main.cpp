@@ -14,15 +14,22 @@ using Garden = std::vector<std::string>;
 
 using Unit = long long;
 
-using AreaPerimeter = std::pair<Unit, Unit>;
-
 using Tile = char;
 
 using Coordinate = long long;
 
+using Heading = Coordinate;
+
 using Position = std::pair<Coordinate, Coordinate>;
 
-using Measurement = std::pair<Position, AreaPerimeter>;
+using HeadingCoordinatePair = std::pair<Heading, Coordinate>;
+
+using HeadingPositionPair = std::pair<Heading, Position>;
+
+constexpr Heading NORTH = 3;
+constexpr Heading EAST = 0;
+constexpr Heading SOUTH = 1;
+constexpr Heading WEST = 2;
 
 constexpr std::array<Position, 4> MOVEMENTS = {
     {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}};
@@ -61,7 +68,7 @@ bool is_same_area(const Garden &garden, const Tile region_type,
 
 Unit count_sides(
     const Garden &garden, const Position &region,
-    const std::set<std::pair<Coordinate, Position>> &sides_touching_perimeter) {
+    const std::set<HeadingPositionPair> &sides_touching_perimeter) {
   Unit num_sides = 0;
 
   // Need to keep track of continuous sides
@@ -74,30 +81,38 @@ Unit count_sides(
   // index 1, 3 move rows
   // Map pair of (movement_index, coordinate not affected by movement (e.g. col
   // if moves columns)) to other coordinate
-  std::map<std::pair<Coordinate, Coordinate>, std::vector<Coordinate>>
-      side_segments;
 
+  // If our heading (movement_index) wants to move columns, then the row is
+  // unique per side. The same is true for moving rows and the column being
+  // unique. So at least one side per unique heading and coordinate pair plus we
+  // need to check if the other coordinates found with this unique heading and
+  // coordinate pair are contiguous
+
+  //   3
+  // 2-|-0
+  //   1
+
+  std::map<HeadingCoordinatePair, std::vector<Coordinate>> side_segments;
+
+  // Collect segments to detect if contiguous
   for (const auto &[movement_index, position] : sides_touching_perimeter) {
     const auto [row, col] = position;
-
-    if (movement_index == 0 || movement_index == 2) {
-      const std::pair<Coordinate, Coordinate> unique_side =
+    if (movement_index == EAST || movement_index == WEST) {
+      const HeadingCoordinatePair unique_side =
           std::make_pair(movement_index, col);
       side_segments[unique_side].push_back(row);
-    } else {
-      const std::pair<Coordinate, Coordinate> unique_side =
+    } else if (movement_index == NORTH || movement_index == SOUTH) {
+      const HeadingCoordinatePair unique_side =
           std::make_pair(movement_index, row);
       side_segments[unique_side].push_back(col);
     }
   }
 
+  // Check if segments are contiguous
   for (auto &[unique_side, segments] : side_segments) {
     std::sort(segments.begin(), segments.end());
     ++num_sides;
-    for (size_t index = 0; index < segments.size(); ++index) {
-      if (index == 0) {
-        continue;
-      }
+    for (size_t index = 1; index < segments.size(); ++index) {
       if (segments[index - 1] + 1 != segments[index]) {
         ++num_sides;
       }
@@ -119,7 +134,7 @@ Unit get_region_price(Garden &garden, const Position region,
 
   std::set<Position> seen{};
 
-  std::set<std::pair<Coordinate, Position>> sides_touching_perimeter;
+  std::set<HeadingPositionPair> sides_touching_perimeter;
 
   while (!attempts.empty()) {
     auto attempt = attempts.front();
@@ -140,19 +155,13 @@ Unit get_region_price(Garden &garden, const Position region,
       const auto new_pos = std::make_pair(new_row, new_col);
 
       if (!is_in_bounds(garden, new_pos)) {
-        perimeter += 1;
-        if (is_part_2) {
-          sides_touching_perimeter.insert(
-              std::make_pair(movement_index, attempt));
-        }
+        sides_touching_perimeter.insert(
+            std::make_pair(movement_index, attempt));
         continue;
       }
       if (garden[new_row][new_col] != region_type) {
-        perimeter += 1;
-        if (is_part_2) {
-          sides_touching_perimeter.insert(
-              std::make_pair(movement_index, attempt));
-        }
+        sides_touching_perimeter.insert(
+            std::make_pair(movement_index, attempt));
         continue;
       }
       if (seen.count(new_pos) > 0) {
@@ -170,6 +179,8 @@ Unit get_region_price(Garden &garden, const Position region,
     } else {
       perimeter = count_sides(garden, region, sides_touching_perimeter);
     }
+  } else {
+    perimeter = sides_touching_perimeter.size();
   }
 
   for (const auto &position : seen) {
