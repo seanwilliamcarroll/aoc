@@ -102,9 +102,16 @@ void print_equations(const Equations &equations) {
 }
 
 Tokens find_intersection_cost(const Equation &equation) {
+  // Want to return the cost at the point of intersection, if there is a point
+  // of intersection
+
   const auto [a_x, a_y] = equation.m_ButtonA;
   const auto [b_x, b_y] = equation.m_ButtonB;
   const auto [p_x, p_y] = equation.m_Prize;
+
+  if (a_x == 0 || a_y == 0 || b_x == 0 || b_y == 0) {
+    return 0;
+  }
 
   const double a_x_double = equation.m_ButtonA.first;
   const double b_x_double = equation.m_ButtonB.first;
@@ -119,13 +126,10 @@ Tokens find_intersection_cost(const Equation &equation) {
   // a_y * num_a_presses + b_y * num_b_presses == p_y
   // intersect
 
-  if (b_y_double == 0 || b_x_double == 0) {
-    return -1;
-  }
   auto num_a_presses_double =
       (a_y_double / b_y_double) - (a_x_double / b_x_double);
   if (num_a_presses_double == 0) {
-    return -1;
+    return 0;
   }
   num_a_presses_double =
       ((p_y_double / b_y_double) - (p_x_double / b_x_double)) /
@@ -134,17 +138,27 @@ Tokens find_intersection_cost(const Equation &equation) {
   auto num_b_presses_double = (p_x_double / b_x_double) -
                               (a_x_double / b_x_double) * num_a_presses_double;
 
-  Coordinate num_a_presses = std::llround(num_a_presses_double);
-  Coordinate num_b_presses = std::llround(num_b_presses_double);
+  // Convert back to integer and confirm the numbers are positive and yield the
+  // correct prize position
 
-  if ((a_x * num_a_presses + b_x * num_b_presses == p_x) &&
+  const Coordinate num_a_presses = std::llround(num_a_presses_double);
+  const Coordinate num_b_presses = std::llround(num_b_presses_double);
+
+  if ((num_a_presses > 0) && (num_b_presses > 0) &&
+      (a_x * num_a_presses + b_x * num_b_presses == p_x) &&
       (a_y * num_a_presses + b_y * num_b_presses == p_y)) {
     return num_a_presses * BUTTON_A_COST + num_b_presses * BUTTON_B_COST;
   }
-  return -1;
+  return 0;
 }
 
-Tokens solve_equation(const Equation &equation) {
+template <typename IntegralType>
+bool is_evenly_divisible(const IntegralType numerator,
+                         const IntegralType denominator) {
+  return (denominator != 0 && numerator % denominator == 0);
+}
+
+Tokens get_minimized_cost(const Equation &equation) {
 
   const auto [a_x, a_y] = equation.m_ButtonA;
   const auto [b_x, b_y] = equation.m_ButtonB;
@@ -155,33 +169,34 @@ Tokens solve_equation(const Equation &equation) {
   // Find intersections
 
   // Set A presses to 0, find intersection
-  if (p_x / b_x == p_y / b_y && p_x % b_x == 0 && p_y % b_y == 0) {
-    total_costs.push_back(p_y / b_y);
+  if (is_evenly_divisible(b_x, p_x) && is_evenly_divisible(b_y, p_y) &&
+      (p_x / b_x) == (p_y / b_y)) {
+    total_costs.push_back(BUTTON_B_COST * (p_y / b_y));
   }
 
   // Set B presses to 0, find intersection
-  if (p_x / a_x == p_y / a_y && p_x % a_x == 0 && p_y % a_y == 0) {
-    total_costs.push_back(p_y / a_y);
+  if (is_evenly_divisible(a_x, p_x) && is_evenly_divisible(a_y, p_y) &&
+      (p_x / a_x) == (p_y / a_y)) {
+    total_costs.push_back(BUTTON_A_COST * (p_y / a_y));
   }
 
   // Find intersection of A and B presses
-  const auto intersection_cost = find_intersection_cost(equation);
-  if (intersection_cost > 0) {
-    total_costs.push_back(intersection_cost);
-  }
+  total_costs.push_back(find_intersection_cost(equation));
 
   if (total_costs.empty()) {
     return 0;
+  } else if (total_costs.size() == 1) {
+    return total_costs.front();
   }
 
   // Take the minimum
   return *std::min_element(total_costs.begin(), total_costs.end());
 }
 
-Tokens get_minimized_cost(const Equations &equations) {
+Tokens get_total_minimized_cost(const Equations &equations) {
   Tokens cost = 0;
   for (const auto &equation : equations) {
-    cost += solve_equation(equation);
+    cost += get_minimized_cost(equation);
   }
   return cost;
 }
@@ -203,13 +218,13 @@ int main(int argc, char *argv[]) {
 
   const auto equations = get_equations_from_file(argv[1]);
 
-  Tokens accumulator = get_minimized_cost(equations);
+  Tokens accumulator = get_total_minimized_cost(equations);
 
   std::cout << "Part 1 cost:  " << accumulator << std::endl;
 
   const auto new_equations = convert_equations_part_2(equations);
 
-  accumulator = get_minimized_cost(new_equations);
+  accumulator = get_total_minimized_cost(new_equations);
 
   std::cout << "Part 2 cost:  " << accumulator << std::endl;
 
