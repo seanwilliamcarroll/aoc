@@ -26,6 +26,8 @@ add_link_options(-fsanitize=address)
 set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options})
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
+add_subdirectory(core)
+
 add_subdirectory(d01)
 add_subdirectory(d02)
 add_subdirectory(d03)

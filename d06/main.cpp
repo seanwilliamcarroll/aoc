@@ -1,12 +1,12 @@
-#include <array>     // for array
-#include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
-#include <iostream>  // for cout, cerr
-#include <set>       // for set
-#include <stddef.h>  // for size_t
-#include <stdexcept> // for runtime_error
-#include <string>    // for char_traits, basic_string, string, operator+
-#include <utility>   // for pair, make_pair
-#include <vector>    // for vector
+#include <array>       // for array
+#include <file_io.hpp> // for get_lines_from_file
+#include <iostream>    // for basic_ostream, operator<<, endl, cout, cerr
+#include <set>         // for set
+#include <stddef.h>    // for size_t
+#include <stdexcept>   // for runtime_error
+#include <string>      // for basic_string, char_traits, operator+, string
+#include <utility>     // for pair, make_pair
+#include <vector>      // for vector
 
 using Grid = std::vector<std::string>;
 
@@ -34,24 +34,6 @@ Coordinates get_guard_movement(const char guard_tile) {
                            guard_tile);
 }
 
-Grid get_grid_from_file(const std::string &filepath) {
-  std::ifstream in_stream(filepath);
-
-  Grid grid;
-  for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
-    grid.push_back(line);
-  }
-
-  return grid;
-}
-
-void print_grid(const Grid &grid) {
-  for (const auto &row : grid) {
-    std::cout << row << std::endl;
-  }
-  std::cout << std::endl;
-}
-
 Coordinates find_guard(const Grid &grid) {
   for (int row_index = 0; row_index < grid.size(); ++row_index) {
     for (int col_index = 0; col_index < grid[row_index].size(); ++col_index) {
@@ -67,14 +49,15 @@ Coordinates find_guard(const Grid &grid) {
 }
 
 bool in_bounds(const Grid &grid, const int row_index, const int col_index) {
-  return (row_index >= 0 && row_index <= grid.size() && col_index >= 0 &&
-          col_index <= grid[row_index].size());
+  return (row_index >= 0 && row_index < grid.size() && col_index >= 0 &&
+          col_index < grid.back().size());
 }
 
 char rotate_guard(const char guard_tile) {
   size_t pos{};
-  while (pos < NUM_DIRECTIONS && GUARD_TILES[++pos] != guard_tile)
-    ;
+  while (pos < NUM_DIRECTIONS && GUARD_TILES[pos] != guard_tile) {
+    ++pos;
+  }
   return GUARD_TILES[((pos + 1) % NUM_DIRECTIONS)];
 }
 
@@ -171,7 +154,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  const auto grid = get_grid_from_file(argv[1]);
+  const Grid grid = get_lines_from_file(argv[1]);
 
   const auto visited_grid = simulate_guard_const(grid);
 

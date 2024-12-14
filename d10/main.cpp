@@ -1,11 +1,11 @@
-#include <array>    // for array
-#include <deque>    // for deque
-#include <fstream>  // for basic_ostream, endl, basic_istream, operator<<
-#include <iostream> // for cout, cerr
-#include <set>      // for set
-#include <string>   // for char_traits, basic_string, string
-#include <utility>  // for pair
-#include <vector>   // for vector
+#include <array>       // for array
+#include <deque>       // for deque
+#include <file_io.hpp> // for get_lines_from_file
+#include <iostream>    // for basic_ostream, endl, operator<<, cout, cerr
+#include <set>         // for set
+#include <string>      // for char_traits, basic_string, string
+#include <utility>     // for pair
+#include <vector>      // for vector
 
 using ElevationMap = std::vector<std::string>;
 
@@ -20,24 +20,6 @@ constexpr Tile TRAILEND = '9';
 
 constexpr std::array<Position, 4> MOVE_DIRECTIONS = {
     {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
-
-ElevationMap get_elev_map_from_file(const std::string &filepath) {
-  std::ifstream in_stream(filepath);
-
-  ElevationMap elev_map;
-  for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
-    elev_map.push_back(line);
-  }
-
-  return elev_map;
-}
-
-void print_elev_map(const ElevationMap &elev_map) {
-  for (const auto &line : elev_map) {
-    std::cout << line << std::endl;
-  }
-  std::cout << std::endl;
-}
 
 Positions get_trailhead_positions(const ElevationMap &elev_map) {
   Positions trailhead_positions;
@@ -132,9 +114,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  const auto elev_map = get_elev_map_from_file(argv[1]);
-
-  // print_elev_map(elev_map);
+  const ElevationMap elev_map = get_lines_from_file(argv[1]);
 
   int accumulator = count_unique_trailheads(elev_map);
 

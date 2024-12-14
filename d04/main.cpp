@@ -1,22 +1,11 @@
 #include <algorithm>        // for reverse
-#include <fstream>          // for basic_ostream, operator<<, endl, basic_i...
+#include <file_io.hpp>      // for get_lines_from_file
 #include <initializer_list> // for initializer_list
-#include <iostream>         // for cout, cerr
+#include <iostream>         // for basic_ostream, endl, operator<<, cout, cerr
 #include <stddef.h>         // for size_t
-#include <string>           // for basic_string, char_traits, string
+#include <string>           // for basic_string, string, char_traits, swap
 #include <utility>          // for pair
 #include <vector>           // for vector
-
-std::vector<std::string> get_lines_from_file(const std::string &filepath) {
-  std::ifstream in_stream(filepath);
-
-  std::vector<std::string> output;
-
-  for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
-    output.push_back(line);
-  }
-  return output;
-}
 
 int count_xmas_samx(const std::vector<std::string> &lines) {
   int accumulator = 0;
@@ -151,13 +140,6 @@ int count_x_shaped_mas(const std::vector<std::string> &lines) {
   }
 
   return count;
-}
-
-void print_grid(const std::vector<std::string> &lines) {
-  for (const auto &line : lines) {
-    std::cout << line << std::endl;
-  }
-  std::cout << std::endl << std::endl;
 }
 
 int count_all_xmas_part_1(const std::vector<std::string> &lines) {

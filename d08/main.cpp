@@ -1,12 +1,12 @@
 #include <_ctype.h>      // for isalnum
 #include <cctype>        // for isalnum
-#include <fstream>       // for basic_ostream, endl, operator<<, basic_istream
-#include <iostream>      // for cout, cerr
+#include <file_io.hpp>   // for get_lines_from_file
+#include <iostream>      // for basic_ostream, endl, operator<<, cout, cerr
 #include <set>           // for set
 #include <stddef.h>      // for size_t
 #include <string>        // for char_traits, basic_string, string
 #include <unordered_map> // for __hash_map_iterator, operator==, unordered_map
-#include <utility>       // for pair, make_pair
+#include <utility>       // for make_pair, pair
 #include <vector>        // for vector
 
 using Coordinate = int;
@@ -24,24 +24,6 @@ using Positions = std::vector<Position>;
 using AntennaPositions = std::unordered_map<Antenna, Positions>;
 
 bool is_antenna(const Tile input) { return std::isalnum(input); }
-
-AntennaMap get_antenna_map_from_file(const std::string &filepath) {
-  std::ifstream in_stream(filepath);
-
-  AntennaMap antenna_map;
-  for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
-    antenna_map.push_back(line);
-  }
-
-  return antenna_map;
-}
-
-void print_antenna_map(const AntennaMap &antenna_map) {
-  for (const auto &line : antenna_map) {
-    std::cout << line << std::endl;
-  }
-  std::cout << std::endl;
-}
 
 AntennaPositions get_antenna_positions(const AntennaMap &antenna_map) {
   AntennaPositions antenna_positions;
@@ -144,7 +126,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  const auto antenna_map = get_antenna_map_from_file(argv[1]);
+  const AntennaMap antenna_map = get_lines_from_file(argv[1]);
 
   bool is_part_2 = false;
 

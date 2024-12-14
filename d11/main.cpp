@@ -26,13 +26,6 @@ Stones get_stones_from_file(const std::string &filepath) {
   return stones;
 }
 
-void print_stones(const Stones &stones) {
-  for (const auto stone : stones) {
-    std::cout << stone << " ";
-  }
-  std::cout << std::endl;
-}
-
 std::pair<Stone, Stone> do_blink(const Stone stone) {
   if (stone == 0) {
     return std::make_pair(1, -1);

@@ -8,3 +8,5 @@ set_target_properties(d06-exe
   OUTPUT_NAME d06
   CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options}
 )
+
+target_link_libraries(d06-exe core)

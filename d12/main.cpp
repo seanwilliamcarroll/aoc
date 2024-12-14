@@ -1,14 +1,14 @@
-#include <algorithm> // for sort
-#include <array>     // for array
-#include <deque>     // for deque
-#include <fstream>   // for basic_ostream, endl, operator<<, basic_istream
-#include <iostream>  // for cout, cerr
-#include <map>       // for map, __map_iterator
-#include <set>       // for set, __tree_const_iterator
-#include <stddef.h>  // for size_t
-#include <string>    // for char_traits, basic_string, string
-#include <utility>   // for pair, make_pair
-#include <vector>    // for vector
+#include <algorithm>   // for sort
+#include <array>       // for array
+#include <deque>       // for deque
+#include <file_io.hpp> // for get_lines_from_file
+#include <iostream>    // for basic_ostream, endl, operator<<, cout, cerr
+#include <map>         // for map, __map_iterator
+#include <set>         // for set, __tree_const_iterator
+#include <stddef.h>    // for size_t
+#include <string>      // for char_traits, basic_string, string
+#include <utility>     // for pair, make_pair
+#include <vector>      // for vector
 
 using Garden = std::vector<std::string>;
 
@@ -35,24 +35,6 @@ constexpr std::array<Position, 4> MOVEMENTS = {
     {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}};
 
 constexpr Tile SEEN = '_';
-
-Garden get_garden_from_file(const std::string &filepath) {
-  std::ifstream in_stream(filepath);
-
-  Garden garden;
-  for (std::string line; std::getline(in_stream, line); /*BLANK*/) {
-    garden.push_back(line);
-  }
-
-  return garden;
-}
-
-void print_garden(const Garden &garden) {
-  for (const auto &row : garden) {
-    std::cout << row << std::endl;
-  }
-  std::cout << std::endl;
-}
 
 bool is_in_bounds(const Garden &garden, const Position &position) {
   const auto [row, col] = position;
@@ -215,7 +197,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  const auto garden = get_garden_from_file(argv[1]);
+  const Garden garden = get_lines_from_file(argv[1]);
 
   bool is_part_2 = false;
 
