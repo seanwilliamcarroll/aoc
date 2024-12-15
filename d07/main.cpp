@@ -1,11 +1,12 @@
-#include <core_lib.hpp>
-#include <deque>    // for deque, __deque_iterator
-#include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
-#include <iostream> // for cout, cerr
-#include <stddef.h> // for size_t
-#include <string>   // for char_traits, stoull, string
-#include <utility>  // for make_pair, pair
-#include <vector>   // for vector
+#include <cmath>        // for floor, log10
+#include <core_lib.hpp> // for greet_day
+#include <deque>        // for deque, __deque_iterator
+#include <fstream>      // for basic_ostream, operator<<, endl, basic_istream
+#include <iostream>     // for cout, cerr
+#include <stddef.h>     // for size_t
+#include <string>       // for char_traits, stoull, string
+#include <utility>      // for make_pair, pair
+#include <vector>       // for vector
 
 using TestValue = unsigned long long;
 
@@ -68,78 +69,74 @@ void print_equations(const Equations &equations) {
 }
 
 TestValue do_concat(const TestValue left, const TestValue right) {
-  const std::string output_str = std::to_string(left) + std::to_string(right);
-  return std::stoull(output_str);
+  TestValue num_digits = TestValue(std::floor(std::log10(right))) + 1;
+  return (std::pow(10ULL, num_digits) * left) + right;
 }
 
 bool is_equation_possible(const Equation &equation,
                           const bool is_part_2 = false) {
   const auto &[result, operands] = equation;
 
-  struct IntermediateResult {
-    TestValue value_so_far;
-    Operands operands_left;
-    IntermediateResult(TestValue value_so_far, const Operands &operands)
-        : value_so_far(value_so_far)
-        , operands_left(operands) {}
-  };
+  using IntermediateResult = std::pair<TestValue, size_t>;
 
   std::deque<IntermediateResult> attempts;
-  attempts.emplace_back(TestValue(), operands);
+  attempts.emplace_back(TestValue(), 0);
   while (attempts.size() > 0) {
-    auto &attempt = attempts.front();
-    if (attempt.operands_left.empty()) {
-      if (result == attempt.value_so_far) {
+    const auto &attempt = attempts.front();
+    const auto [value_so_far, operand_index] = attempt;
+    attempts.pop_front();
+    if (operand_index == operands.size()) {
+      if (result == value_so_far) {
         return true;
       }
       // drop attempt
-    } else {
-      TestValue next_operand = attempt.operands_left.front();
-      attempt.operands_left.pop_front();
-      TestValue next_value_so_far = attempt.value_so_far + next_operand;
-      if (next_value_so_far <= result) {
-        IntermediateResult add =
-            IntermediateResult(next_value_so_far, attempt.operands_left);
-        attempts.push_back(add);
-      }
-      next_value_so_far = attempt.value_so_far * next_operand;
-      if (next_value_so_far <= result) {
-        IntermediateResult mul =
-            IntermediateResult(next_value_so_far, attempt.operands_left);
-        attempts.push_back(mul);
-      }
-
-      if (is_part_2) {
-        next_value_so_far = do_concat(attempt.value_so_far, next_operand);
-        if (next_value_so_far <= result) {
-          IntermediateResult concat =
-              IntermediateResult(next_value_so_far, attempt.operands_left);
-          attempts.push_back(concat);
-        }
-      }
+      continue;
+    }
+    const TestValue next_operand = operands[operand_index];
+    TestValue next_value_so_far = value_so_far + next_operand;
+    if (next_value_so_far <= result) {
+      attempts.emplace_back(next_value_so_far, operand_index + 1);
+    }
+    next_value_so_far = value_so_far * next_operand;
+    if (next_value_so_far <= result) {
+      attempts.emplace_back(next_value_so_far, operand_index + 1);
     }
 
-    attempts.pop_front();
+    if (!is_part_2) {
+      continue;
+    }
+    next_value_so_far = do_concat(value_so_far, next_operand);
+    if (next_value_so_far <= result) {
+      attempts.emplace_back(next_value_so_far, operand_index + 1);
+    }
   }
 
   return false;
 }
 
-TestValue sum_valid_results(const Equations &equations,
-                            const bool is_part_2 = false) {
+TestValue sum_valid_results(const Equations &equations, const bool is_part_2,
+                            const bool do_display = true) {
   TestValue accumulator{};
 
   for (const auto &equation : equations) {
     if (is_equation_possible(equation, is_part_2)) {
       const auto &[result, _] = equation;
       accumulator += result;
-      std::cout << ".";
+      if (do_display) {
+        std::cout << ".";
+      }
     } else {
-      std::cout << "X";
+      if (do_display) {
+        std::cout << "X";
+      }
     }
-    std::cout << std::flush;
+    if (do_display) {
+      std::cout << std::flush;
+    }
   }
-  std::cout << std::endl;
+  if (do_display) {
+    std::cout << std::endl;
+  }
   return accumulator;
 }
 
