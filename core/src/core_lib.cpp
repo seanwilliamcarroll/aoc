@@ -1,7 +1,19 @@
 #include <core_lib.hpp>
+#include <fstream>   // for basic_ostream, endl, operator<<, basic_istream
+#include <iomanip>   // for operator<<, setfill, setw
+#include <iostream>  // for cout
+#include <stdexcept> // for runtime_error
 
-#include <fstream>
-#include <iostream>
+void greet_day(const int day_number) {
+  std::cout << "==============================================================="
+               "================="
+            << std::endl;
+  std::cout << "Day " << std::setfill('0') << std::setw(2) << day_number
+            << std::endl;
+  std::cout << "==============================================================="
+               "================="
+            << std::endl;
+}
 
 Grid get_lines_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
@@ -31,4 +43,10 @@ bool is_in_bounds(const Grid &grid, const Coordinate row,
 bool is_in_bounds(const Grid &grid, const Position &position) {
   const auto [row, col] = position;
   return is_in_bounds(grid, row, col);
+}
+
+void do_assert(const bool test_value, const std::string &message) {
+  if (!test_value) {
+    throw std::runtime_error("Assertion failed: " + message);
+  }
 }

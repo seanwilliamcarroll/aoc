@@ -190,6 +190,7 @@ int find_easter_egg(const Robots &input_robots) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(14);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -199,11 +200,11 @@ int main(int argc, char *argv[]) {
 
   int accumulator = calculate_safety_after_n_seconds(100, robots);
 
-  std::cout << "Part 1 safety score: " << accumulator << std::endl;
+  std::cout << "Part 1: Safety score: " << accumulator << std::endl;
 
   accumulator = find_easter_egg(robots);
 
-  std::cout << "Part 2 num seconds: " << accumulator << std::endl;
+  std::cout << "Part 2: Num seconds: " << accumulator << std::endl;
 
   return 0;
 }

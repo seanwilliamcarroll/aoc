@@ -1,10 +1,11 @@
 #include <_stdlib.h> // for abs
 #include <cmath>     // IWYU pragma: keep
-#include <cstdlib>   // for size_t
-#include <fstream>   // for basic_ostream, basic_istream, endl, operator<<
-#include <iostream>  // for cout, cerr
-#include <string>    // for char_traits, stoi, string
-#include <vector>    // for vector
+#include <core_lib.hpp>
+#include <cstdlib>  // for size_t
+#include <fstream>  // for basic_ostream, basic_istream, endl, operator<<
+#include <iostream> // for cout, cerr
+#include <string>   // for char_traits, stoi, string
+#include <vector>   // for vector
 
 std::vector<std::vector<int>> get_lists_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
@@ -78,6 +79,7 @@ bool is_safe_with_dampener(const std::vector<int> &list) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(2);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -88,13 +90,13 @@ int main(int argc, char *argv[]) {
   for (const auto &list : lists) {
     accumulator += int(is_safe(list));
   }
-  std::cout << "Num Safe: " << accumulator << std::endl;
+  std::cout << "Part 1: Num Safe: " << accumulator << std::endl;
 
   accumulator = 0;
   for (const auto &list : lists) {
     accumulator += int(is_safe_with_dampener(list));
   }
-  std::cout << "Num Safe with dampener: " << accumulator << std::endl;
+  std::cout << "Part 2: Num Safe with dampener: " << accumulator << std::endl;
 
   return 0;
 }

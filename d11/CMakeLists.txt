@@ -8,3 +8,5 @@ set_target_properties(d11-exe
   OUTPUT_NAME d11
   CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options}
 )
+
+target_link_libraries(d11-exe core)

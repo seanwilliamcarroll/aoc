@@ -1,5 +1,6 @@
 #include <_ctype.h> // for isdigit
 #include <cctype>   // for isdigit
+#include <core_lib.hpp>
 #include <cstddef>  // for size_t
 #include <fstream>  // for basic_ostream, endl, operator<<, basic_ifstream
 #include <iostream> // for cout, cerr
@@ -107,6 +108,7 @@ int calculate_muls(const std::string &input, bool enable_do = false) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(3);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -116,11 +118,11 @@ int main(int argc, char *argv[]) {
 
   int accumulator = calculate_muls(file_stream.str());
 
-  std::cout << "First part sum: " << accumulator << std::endl;
+  std::cout << "Part 1: Sum: " << accumulator << std::endl;
 
   accumulator = calculate_muls(file_stream.str(), true);
 
-  std::cout << "First part sum: " << accumulator << std::endl;
+  std::cout << "Part 2: Sum: " << accumulator << std::endl;
 
   return 0;
 }

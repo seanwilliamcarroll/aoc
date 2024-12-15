@@ -237,6 +237,7 @@ Grid widen_grid(const Grid &input_grid) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(15);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -250,7 +251,7 @@ int main(int argc, char *argv[]) {
   Coordinate accumulator =
       simulate_and_get_gps_total(grid, instructions, is_wide);
 
-  std::cout << "Part 1 gps total: " << accumulator << std::endl;
+  std::cout << "Part 1: GPS total: " << accumulator << std::endl;
 
   const auto wide_grid = widen_grid(grid);
 
@@ -258,7 +259,7 @@ int main(int argc, char *argv[]) {
 
   accumulator = simulate_and_get_gps_total(wide_grid, instructions, is_wide);
 
-  std::cout << "Part 2 gps total: " << accumulator << std::endl;
+  std::cout << "Part 2: GPS total: " << accumulator << std::endl;
 
   return 0;
 }

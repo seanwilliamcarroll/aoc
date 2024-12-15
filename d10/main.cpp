@@ -99,6 +99,7 @@ int count_unique_trails(const ElevationMap &elev_map) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(10);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -108,11 +109,11 @@ int main(int argc, char *argv[]) {
 
   int accumulator = count_unique_trailheads(elev_map);
 
-  std::cout << "Sum for Part 1: " << accumulator << std::endl;
+  std::cout << "Part 1: Sum: " << accumulator << std::endl;
 
   accumulator = count_unique_trails(elev_map);
 
-  std::cout << "Sum for Part 2: " << accumulator << std::endl;
+  std::cout << "Part 2: Sum: " << accumulator << std::endl;
 
   return 0;
 }

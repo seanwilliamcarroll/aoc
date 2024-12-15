@@ -1,3 +1,4 @@
+#include <core_lib.hpp>
 #include <deque>    // for deque, __deque_iterator
 #include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
 #include <iostream> // for cout, cerr
@@ -143,6 +144,7 @@ TestValue sum_valid_results(const Equations &equations,
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(7);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -154,12 +156,12 @@ int main(int argc, char *argv[]) {
 
   TestValue accumulator = sum_valid_results(equations, is_part_2);
 
-  std::cout << "Part 1 sum: " << accumulator << std::endl;
+  std::cout << "Part 1: Sum: " << accumulator << std::endl;
 
   is_part_2 = true;
   accumulator = sum_valid_results(equations, is_part_2);
 
-  std::cout << "Part 2 sum: " << accumulator << std::endl;
+  std::cout << "Part 2: Sum: " << accumulator << std::endl;
 
   return 0;
 }

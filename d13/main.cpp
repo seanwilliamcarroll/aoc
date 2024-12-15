@@ -208,6 +208,7 @@ Equations convert_equations_part_2(const Equations &equations) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(13);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -217,13 +218,13 @@ int main(int argc, char *argv[]) {
 
   Tokens accumulator = get_total_minimized_cost(equations);
 
-  std::cout << "Part 1 cost:  " << accumulator << std::endl;
+  std::cout << "Part 1: Cost:  " << accumulator << std::endl;
 
   const auto new_equations = convert_equations_part_2(equations);
 
   accumulator = get_total_minimized_cost(new_equations);
 
-  std::cout << "Part 2 cost:  " << accumulator << std::endl;
+  std::cout << "Part 2: Cost:  " << accumulator << std::endl;
 
   return 0;
 }

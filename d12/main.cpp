@@ -180,6 +180,7 @@ Unit get_total_price(const Garden &input_garden, const bool is_part_2 = false) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(12);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -191,13 +192,13 @@ int main(int argc, char *argv[]) {
 
   Unit accumulator = get_total_price(garden, is_part_2);
 
-  std::cout << "Part 1 price: " << accumulator << std::endl;
+  std::cout << "Part 1: Price: " << accumulator << std::endl;
 
   is_part_2 = true;
 
   accumulator = get_total_price(garden, is_part_2);
 
-  std::cout << "Part 2 price: " << accumulator << std::endl;
+  std::cout << "Part 2: Price: " << accumulator << std::endl;
 
   return 0;
 }

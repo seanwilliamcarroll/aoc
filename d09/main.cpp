@@ -1,3 +1,4 @@
+#include <core_lib.hpp>
 #include <deque>    // for deque, __deque_iterator
 #include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
 #include <iostream> // for cout, cerr
@@ -224,6 +225,7 @@ NumBlocks get_part_2_checksum(const DefragMap &defrag_map) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(9);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -233,11 +235,11 @@ int main(int argc, char *argv[]) {
 
   NumBlocks accumulator = get_part_1_checksum(defrag_map);
 
-  std::cout << "Part 1 checksum: " << accumulator << std::endl;
+  std::cout << "Part 1: Checksum: " << accumulator << std::endl;
 
   accumulator = get_part_2_checksum(defrag_map);
 
-  std::cout << "Part 2 checksum: " << accumulator << std::endl;
+  std::cout << "Part 2: Checksum: " << accumulator << std::endl;
 
   return 0;
 }

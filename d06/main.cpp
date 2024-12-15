@@ -1,13 +1,15 @@
 #include <array>        // for array
-#include <core_lib.hpp> // for Grid, Tile, Position, is_in_bounds, get_lines...
-#include <iostream>     // for basic_ostream, operator<<, endl, cout, cerr
-#include <set>          // for set
+#include <core_lib.hpp> // for Grid, Position, Tile, is_in_bounds, get_line...
+#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
+#include <set>          // for set, __tree_const_iterator
 #include <stddef.h>     // for size_t
 #include <stdexcept>    // for runtime_error
-#include <string>       // for basic_string, char_traits, operator+, string
+#include <string>       // for char_traits, basic_string
 #include <utility>      // for pair, make_pair
 
-constexpr Tile OBSTACLE = '#';
+using PositionSet = std::set<Position>;
+
+using HeadingPositionSet = std::set<std::pair<int, Position>>;
 
 constexpr size_t NUM_DIRECTIONS = 4;
 
@@ -18,16 +20,7 @@ constexpr std::array<Position, NUM_DIRECTIONS> GUARD_MOVEMENTS = {
     {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}};
 
 constexpr Tile VISITED = 'X';
-
-Position get_guard_movement(const Tile guard_tile) {
-  for (size_t pos = 0; pos < GUARD_TILES.size(); ++pos) {
-    if (GUARD_TILES[pos] == guard_tile) {
-      return GUARD_MOVEMENTS[pos];
-    }
-  }
-  throw std::runtime_error(std::string("Unexpected guard position: ") +
-                           guard_tile);
-}
+constexpr Tile OBSTACLE = '#';
 
 Position find_guard(const Grid &grid) {
   for (int row_index = 0; row_index < grid.size(); ++row_index) {
@@ -40,105 +33,96 @@ Position find_guard(const Grid &grid) {
     }
   }
   throw std::runtime_error("Should have found the guard!");
-  return std::make_pair(0, 0);
 }
 
-Tile rotate_guard(const Tile guard_tile) {
-  size_t pos{};
-  while (pos < NUM_DIRECTIONS && GUARD_TILES[pos] != guard_tile) {
-    ++pos;
+int get_position_index(const Tile guard_tile) {
+  if (guard_tile == GUARD_TILES[0]) {
+    return 0;
+  } else if (guard_tile == GUARD_TILES[1]) {
+    return 1;
+  } else if (guard_tile == GUARD_TILES[2]) {
+    return 2;
+  } else if (guard_tile == GUARD_TILES[3]) {
+    return 3;
   }
-  return GUARD_TILES[((pos + 1) % NUM_DIRECTIONS)];
+  throw std::runtime_error("Unknown guard tile!");
 }
 
-Tile simulate_guard(Grid &grid) {
-  Position starting_position = find_guard(grid);
-  int row_index(starting_position.first);
-  int col_index(starting_position.second);
-  std::set<std::pair<Tile, Position>> visited;
-  while (is_in_bounds(grid, row_index, col_index)) {
-    const auto guard_tile = grid[row_index][col_index];
+PositionSet
+from_heading_position_set(const HeadingPositionSet &heading_position_set) {
+  PositionSet output;
+  for (const auto &[_, position] : heading_position_set) {
+    output.insert(position);
+  }
+  return output;
+}
+
+std::pair<Tile, HeadingPositionSet>
+simulate_guard(const Grid &grid, const Position starting_position) {
+  auto [row, col] = starting_position;
+  HeadingPositionSet visited;
+  auto guard_tile = get_position_index(grid[row][col]);
+  while (is_in_bounds(grid, row, col)) {
     const auto current_heading =
-        std::make_pair(guard_tile, std::make_pair(row_index, col_index));
+        std::make_pair(guard_tile, std::make_pair(row, col));
     if (visited.count(current_heading) > 0) {
-      return OBSTACLE;
+      return std::make_pair(OBSTACLE, visited);
     }
-    const auto next_movement = get_guard_movement(guard_tile);
-    const auto next_row_index = row_index + next_movement.first;
-    const auto next_col_index = col_index + next_movement.second;
-    if (!is_in_bounds(grid, next_row_index, next_col_index)) {
-      grid[row_index][col_index] = VISITED;
-      return VISITED;
+    const auto [row_incr, col_incr] = GUARD_MOVEMENTS[guard_tile];
+    const auto next_row = row + row_incr;
+    const auto next_col = col + col_incr;
+    if (!is_in_bounds(grid, next_row, next_col)) {
+      visited.insert(std::make_pair(guard_tile, std::make_pair(row, col)));
+      return std::make_pair(VISITED, visited);
     }
-    const auto next_tile = grid[next_row_index][next_col_index];
+    const auto next_tile = grid[next_row][next_col];
     if (next_tile == OBSTACLE) {
-      grid[row_index][col_index] = rotate_guard(guard_tile);
+      guard_tile = (guard_tile + 1) % NUM_DIRECTIONS;
       continue;
     }
-    grid[row_index][col_index] = VISITED;
-    visited.insert(
-        std::make_pair(guard_tile, std::make_pair(row_index, col_index)));
-    grid[next_row_index][next_col_index] = guard_tile;
-    row_index = next_row_index;
-    col_index = next_col_index;
+    visited.insert(std::make_pair(guard_tile, std::make_pair(row, col)));
+    row = next_row;
+    col = next_col;
   }
-  return VISITED;
+  return std::make_pair(VISITED, visited);
 }
 
-Grid simulate_guard_const(const Grid &input_grid) {
-  Grid grid(input_grid);
-  const auto output_tile = simulate_guard(grid);
+PositionSet simulate_guard_get_visited_positions(const Grid &grid) {
+  const Position starting_position = find_guard(grid);
+  const auto [output_tile, heading_position_set] =
+      simulate_guard(grid, starting_position);
   if (output_tile != VISITED) {
     throw std::runtime_error("Expected not to have a cycle!");
   }
-  return grid;
-}
-
-size_t count_visited(const Grid &grid) {
-  size_t total_visited{};
-  for (int row_index = 0; row_index < grid.size(); ++row_index) {
-    for (int col_index = 0; col_index < grid[row_index].size(); ++col_index) {
-      const Tile current_space = grid[row_index][col_index];
-      if (current_space == VISITED) {
-        ++total_visited;
-      }
-    }
-  }
-  return total_visited;
-}
-
-bool contains_guard(const Grid &grid, const int row_index,
-                    const int col_index) {
-  const auto tile = grid[row_index][col_index];
-  return (tile == GUARD_TILES[0] || tile == GUARD_TILES[1] ||
-          tile == GUARD_TILES[2] || tile == GUARD_TILES[3]);
+  return from_heading_position_set(heading_position_set);
 }
 
 size_t count_new_obstacle_candidates(const Grid &original_grid,
-                                     const Grid &visited_grid) {
+                                     const PositionSet &visited_positions) {
   // I assume there is a more efficient way of doing this, but this seemed to
   // work quick enough
   size_t new_obstacle_candidates{};
   Grid scratch_grid(original_grid);
-  for (int row_index = 0; row_index < visited_grid.size(); ++row_index) {
-    for (int col_index = 0; col_index < visited_grid[row_index].size();
-         ++col_index) {
-      const Tile current_space = visited_grid[row_index][col_index];
-      if (!contains_guard(original_grid, row_index, col_index) &&
-          current_space == VISITED) {
-        scratch_grid = original_grid;
-        scratch_grid[row_index][col_index] = OBSTACLE;
-        const auto outcome = simulate_guard(scratch_grid);
-        if (outcome == OBSTACLE) {
-          ++new_obstacle_candidates;
-        }
-      }
+  const Position starting_position = find_guard(original_grid);
+  for (const auto &position : visited_positions) {
+    if (starting_position == position) {
+      continue;
     }
+    const auto [row, col] = position;
+    const auto old_value = scratch_grid[row][col];
+    scratch_grid[row][col] = OBSTACLE;
+    const auto [output_tile, _] =
+        simulate_guard(scratch_grid, starting_position);
+    if (output_tile == OBSTACLE) {
+      ++new_obstacle_candidates;
+    }
+    scratch_grid[row][col] = old_value;
   }
   return new_obstacle_candidates;
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(6);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -146,15 +130,14 @@ int main(int argc, char *argv[]) {
 
   const Grid grid = get_lines_from_file(argv[1]);
 
-  const auto visited_grid = simulate_guard_const(grid);
+  const auto visited_positions = simulate_guard_get_visited_positions(grid);
+  auto accumulator = visited_positions.size();
 
-  int accumulator = count_visited(visited_grid);
+  std::cout << "Part 1: Num Tiles Visited " << accumulator << std::endl;
 
-  std::cout << "Part 1: Visited " << accumulator << " tiles" << std::endl;
+  accumulator = count_new_obstacle_candidates(grid, visited_positions);
 
-  accumulator = count_new_obstacle_candidates(grid, visited_grid);
-
-  std::cout << "Part 2: New Obstacle Candidates " << accumulator << " tiles"
+  std::cout << "Part 2: Num New Obstacle Candidates " << accumulator
             << std::endl;
 
   return 0;

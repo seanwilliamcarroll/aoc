@@ -109,6 +109,7 @@ int count_unique_antinode_positions(const AntennaMap &antenna_map,
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(8);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -120,13 +121,13 @@ int main(int argc, char *argv[]) {
 
   int accumulator = count_unique_antinode_positions(antenna_map, is_part_2);
 
-  std::cout << "Part 1 total antinodes: " << accumulator << std::endl;
+  std::cout << "Part 1: Total antinodes: " << accumulator << std::endl;
 
   is_part_2 = true;
 
   accumulator = count_unique_antinode_positions(antenna_map, is_part_2);
 
-  std::cout << "Part 2 total antinodes: " << accumulator << std::endl;
+  std::cout << "Part 2: Total antinodes: " << accumulator << std::endl;
 
   return 0;
 }

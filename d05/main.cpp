@@ -1,6 +1,7 @@
-#include <__hash_table>  // for __hash_const_iterator
-#include <_ctype.h>      // for isdigit
-#include <cctype>        // for isdigit
+#include <__hash_table> // for __hash_const_iterator
+#include <_ctype.h>     // for isdigit
+#include <cctype>       // for isdigit
+#include <core_lib.hpp>
 #include <fstream>       // for basic_ostream, basic_istream, endl, operator<<
 #include <iostream>      // for cout, cerr
 #include <stddef.h>      // for size_t
@@ -199,6 +200,7 @@ int sum_middle_pages(const PageOrders &page_orders) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(5);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -206,23 +208,19 @@ int main(int argc, char *argv[]) {
 
   const auto [all_rules, page_orders] = get_rules_and_pages_from_file(argv[1]);
 
-  std::cout << "Num rule sets: " << all_rules.size() << std::endl;
-
-  std::cout << "Num page orders: " << page_orders.size() << std::endl;
-
   const auto [valid_page_orders, invalid_page_orders] =
       find_valid_and_invalid_page_orders(page_orders, all_rules);
 
   int accumulator = sum_middle_pages(valid_page_orders);
 
-  std::cout << "Sum for part 1: " << accumulator << std::endl;
+  std::cout << "Part 1: Sum: " << accumulator << std::endl;
 
   PageOrders fixed_page_orders =
       fix_invalid_page_orders(invalid_page_orders, all_rules);
 
   accumulator = sum_middle_pages(fixed_page_orders);
 
-  std::cout << "Sum for part 2: " << accumulator << std::endl;
+  std::cout << "Part 2: Sum: " << accumulator << std::endl;
 
   return 0;
 }

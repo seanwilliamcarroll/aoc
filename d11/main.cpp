@@ -1,4 +1,5 @@
-#include <cmath>    // for floor, log10, pow
+#include <cmath> // for floor, log10, pow
+#include <core_lib.hpp>
 #include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
 #include <iostream> // for cout, cerr
 #include <map>      // for __map_const_iterator, map
@@ -79,6 +80,7 @@ UniqueStoneCounts create_counts(const Stones &stones) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(11);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -89,11 +91,11 @@ int main(int argc, char *argv[]) {
   UniqueStoneCounts counts = create_counts(stones);
 
   counts = do_n_blinks(counts, 25);
-  std::cout << "Part 1: after 25 blinks: " << get_total_count(counts)
+  std::cout << "Part 1: After 25 blinks: " << get_total_count(counts)
             << std::endl;
 
   counts = do_n_blinks(counts, 50);
-  std::cout << "Part 2: after 75 blinks: " << get_total_count(counts)
+  std::cout << "Part 2: After 75 blinks: " << get_total_count(counts)
             << std::endl;
 
   return 0;

@@ -172,6 +172,7 @@ int count_all_xmas_part_1(const Grid &lines) {
 }
 
 int main(int argc, char *argv[]) {
+  greet_day(4);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
@@ -181,11 +182,11 @@ int main(int argc, char *argv[]) {
 
   int accumulator = count_all_xmas_part_1(lines);
 
-  std::cout << "Part 1 Total: " << accumulator << std::endl;
+  std::cout << "Part 1: Total: " << accumulator << std::endl;
 
   accumulator = count_x_shaped_mas(lines);
 
-  std::cout << "Part 2 Total: " << accumulator << std::endl;
+  std::cout << "Part 2: Total: " << accumulator << std::endl;
 
   return 0;
 }
