@@ -1,3 +1,4 @@
+#include <core_lib.hpp>
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>  // for cout, cerr
 #include <stddef.h>  // for size_t
@@ -5,10 +6,6 @@
 #include <string>    // for char_traits, stoll, string
 #include <utility>   // for make_pair, pair
 #include <vector>    // for vector
-
-using Coordinate = long long;
-
-using Position = std::pair<Coordinate, Coordinate>;
 
 using Velocity = Position;
 
@@ -131,7 +128,7 @@ int calculate_safety(const Robots &robots) {
 }
 
 void print_grid(const Robots &robots) {
-  std::vector<std::string> grid(GRID_HEIGHT, std::string(GRID_WIDTH, ' '));
+  Grid grid(GRID_HEIGHT, std::string(GRID_WIDTH, ' '));
 
   for (const auto &robot : robots) {
     const auto [x_coordinate, y_coordinate] = robot.m_Position;
@@ -155,7 +152,7 @@ int calculate_safety_after_n_seconds(int n_seconds,
 }
 
 bool search_grid(const Robots &robots) {
-  std::vector<std::string> grid(GRID_HEIGHT, std::string(GRID_WIDTH, ' '));
+  Grid grid(GRID_HEIGHT, std::string(GRID_WIDTH, ' '));
 
   for (const auto &robot : robots) {
     const auto [x_coordinate, y_coordinate] = robot.m_Position;

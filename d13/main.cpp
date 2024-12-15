@@ -1,5 +1,6 @@
 #include <algorithm> // for min_element
 #include <cmath>     // for llround
+#include <core_lib.hpp>
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>  // for cout, cerr
 #include <stddef.h>  // for size_t
@@ -7,10 +8,6 @@
 #include <string>    // for char_traits, stoll, string
 #include <utility>   // for make_pair, pair
 #include <vector>    // for vector
-
-using Coordinate = long long;
-
-using Position = std::pair<Coordinate, Coordinate>;
 
 using Increment = Position;
 

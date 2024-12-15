@@ -1,19 +1,15 @@
-#include <array>       // for array
-#include <deque>       // for deque
-#include <file_io.hpp> // for get_lines_from_file
-#include <iostream>    // for basic_ostream, endl, operator<<, cout, cerr
-#include <set>         // for set
-#include <string>      // for char_traits, basic_string, string
-#include <utility>     // for pair
-#include <vector>      // for vector
+#include <array>        // for array
+#include <core_lib.hpp> // for get_lines_from_file
+#include <deque>        // for deque
+#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
+#include <set>          // for set
+#include <string>       // for char_traits, basic_string, string
+#include <utility>      // for pair
+#include <vector>       // for vector
 
-using ElevationMap = std::vector<std::string>;
+using ElevationMap = Grid;
 
-using Coordinate = int;
-using Position = std::pair<Coordinate, Coordinate>;
 using Positions = std::vector<Position>;
-
-using Tile = char;
 
 constexpr Tile TRAILHEAD = '0';
 constexpr Tile TRAILEND = '9';
@@ -31,12 +27,6 @@ Positions get_trailhead_positions(const ElevationMap &elev_map) {
     }
   }
   return trailhead_positions;
-}
-
-bool is_in_bounds(const ElevationMap &elev_map, const Coordinate row,
-                  const Coordinate col) {
-  return (row >= 0 && row < elev_map.size() && col >= 0 &&
-          col < elev_map.front().size());
 }
 
 bool is_elevation_gradually_increasing(const Tile start, const Tile end) {

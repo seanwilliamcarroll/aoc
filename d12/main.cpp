@@ -1,26 +1,20 @@
-#include <algorithm>   // for sort
-#include <array>       // for array
-#include <deque>       // for deque
-#include <file_io.hpp> // for get_lines_from_file
-#include <iostream>    // for basic_ostream, endl, operator<<, cout, cerr
-#include <map>         // for map, __map_iterator
-#include <set>         // for set, __tree_const_iterator
-#include <stddef.h>    // for size_t
-#include <string>      // for char_traits, basic_string, string
-#include <utility>     // for pair, make_pair
-#include <vector>      // for vector
+#include <algorithm>    // for sort
+#include <array>        // for array
+#include <core_lib.hpp> // for get_lines_from_file
+#include <deque>        // for deque
+#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
+#include <map>          // for map, __map_iterator
+#include <set>          // for set, __tree_const_iterator
+#include <stddef.h>     // for size_t
+#include <string>       // for char_traits, basic_string, string
+#include <utility>      // for pair, make_pair
+#include <vector>       // for vector
 
-using Garden = std::vector<std::string>;
+using Garden = Grid;
 
 using Unit = long long;
 
-using Tile = char;
-
-using Coordinate = long long;
-
 using Heading = Coordinate;
-
-using Position = std::pair<Coordinate, Coordinate>;
 
 using HeadingCoordinatePair = std::pair<Heading, Coordinate>;
 
@@ -35,12 +29,6 @@ constexpr std::array<Position, 4> MOVEMENTS = {
     {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}};
 
 constexpr Tile SEEN = '_';
-
-bool is_in_bounds(const Garden &garden, const Position &position) {
-  const auto [row, col] = position;
-  return (row >= 0 && row < garden.size() && col >= 0 &&
-          col < garden.back().size());
-}
 
 bool is_same_area(const Garden &garden, const Tile region_type,
                   const Position &position) {

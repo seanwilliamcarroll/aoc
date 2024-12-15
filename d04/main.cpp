@@ -1,5 +1,5 @@
 #include <algorithm>        // for reverse
-#include <file_io.hpp>      // for get_lines_from_file
+#include <core_lib.hpp>     // for get_lines_from_file
 #include <initializer_list> // for initializer_list
 #include <iostream>         // for basic_ostream, endl, operator<<, cout, cerr
 #include <stddef.h>         // for size_t
@@ -7,7 +7,7 @@
 #include <utility>          // for pair
 #include <vector>           // for vector
 
-int count_xmas_samx(const std::vector<std::string> &lines) {
+int count_xmas_samx(const Grid &lines) {
   int accumulator = 0;
   for (const auto &line : lines) {
     for (const auto &search_word : {"XMAS", "SAMX"}) {
@@ -29,7 +29,7 @@ int count_xmas_samx(const std::vector<std::string> &lines) {
   return accumulator;
 }
 
-std::vector<std::string> transpose(const std::vector<std::string> &lines) {
+Grid transpose(const Grid &lines) {
   size_t longest_line{};
   for (const auto &line : lines) {
     if (longest_line < line.size()) {
@@ -37,7 +37,7 @@ std::vector<std::string> transpose(const std::vector<std::string> &lines) {
     }
   }
 
-  std::vector<std::string> output(longest_line);
+  Grid output(longest_line);
   for (const auto &line : lines) {
     for (size_t character_index = 0; character_index < line.size();
          ++character_index) {
@@ -47,9 +47,8 @@ std::vector<std::string> transpose(const std::vector<std::string> &lines) {
   return output;
 }
 
-std::vector<std::string>
-lower_left_to_upper_right_diagonal(const std::vector<std::string> &lines) {
-  std::vector<std::string> output;
+Grid lower_left_to_upper_right_diagonal(const Grid &lines) {
+  Grid output;
 
   for (size_t row_index = 0; row_index < lines.size(); ++row_index) {
     output.emplace_back();
@@ -74,15 +73,13 @@ lower_left_to_upper_right_diagonal(const std::vector<std::string> &lines) {
   return output;
 }
 
-std::vector<std::string>
-flip_up_and_down(const std::vector<std::string> &lines) {
-  std::vector<std::string> output(lines);
+Grid flip_up_and_down(const Grid &lines) {
+  Grid output(lines);
   std::reverse(output.begin(), output.end());
   return output;
 }
 
-std::vector<std::string>
-upper_left_to_lower_right_diagonal(const std::vector<std::string> &lines) {
+Grid upper_left_to_lower_right_diagonal(const Grid &lines) {
   return lower_left_to_upper_right_diagonal(flip_up_and_down(lines));
 }
 
@@ -90,7 +87,7 @@ bool in_bounds(int index, int max_size) {
   return index >= 0 && index < max_size;
 }
 
-int count_x_shaped_mas(const std::vector<std::string> &lines) {
+int count_x_shaped_mas(const Grid &lines) {
 
   const std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>>
       x_mas_directions = {{{-1, -1}, {1, 1}}, {{1, -1}, {-1, 1}}};
@@ -142,20 +139,20 @@ int count_x_shaped_mas(const std::vector<std::string> &lines) {
   return count;
 }
 
-int count_all_xmas_part_1(const std::vector<std::string> &lines) {
+int count_all_xmas_part_1(const Grid &lines) {
   int accumulator = 0;
 
   int horizontal = count_xmas_samx(lines);
 
   accumulator += horizontal;
 
-  std::vector<std::string> transposed_lines = transpose(lines);
+  Grid transposed_lines = transpose(lines);
 
   int vertical = count_xmas_samx(transposed_lines);
 
   accumulator += vertical;
 
-  std::vector<std::string> lower_left_to_upper_right_diagonal_lines =
+  Grid lower_left_to_upper_right_diagonal_lines =
       lower_left_to_upper_right_diagonal(lines);
 
   int lower_left_to_upper_right =
@@ -163,7 +160,7 @@ int count_all_xmas_part_1(const std::vector<std::string> &lines) {
 
   accumulator += lower_left_to_upper_right;
 
-  std::vector<std::string> upper_left_to_lower_right_diagonal_lines =
+  Grid upper_left_to_lower_right_diagonal_lines =
       upper_left_to_lower_right_diagonal(lines);
 
   int upper_left_to_lower_right =

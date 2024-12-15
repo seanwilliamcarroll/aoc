@@ -1,19 +1,13 @@
-#include <fstream>   // for basic_ostream, basic_istream, endl, operator<<
-#include <iostream>  // for cout, cerr
-#include <map>       // for map
-#include <set>       // for set, __tree_const_iterator
-#include <stdexcept> // for runtime_error
-#include <string>    // for basic_string, char_traits, string
-#include <utility>   // for swap, pair, make_pair
-#include <vector>    // for vector
-
-using Coordinate = long long;
-
-using Position = std::pair<Coordinate, Coordinate>;
+#include <core_lib.hpp> // for Coordinate, Grid, Tile, Position
+#include <fstream>      // for basic_ostream, basic_istream, endl, operator<<
+#include <iostream>     // for cout, cerr
+#include <map>          // for map
+#include <set>          // for set, __tree_const_iterator
+#include <stdexcept>    // for runtime_error
+#include <string>       // for basic_string, char_traits, string
+#include <utility>      // for swap, pair, make_pair
 
 using Movement = Position;
-
-using Grid = std::vector<std::string>;
 
 using Instructions = std::string;
 
@@ -26,8 +20,6 @@ constexpr Instruction WEST = '<';
 
 const std::map<Instruction, Movement> INSTRUCTION_TO_MOVEMENT = {
     {NORTH, {-1, 0}}, {EAST, {0, 1}}, {SOUTH, {1, 0}}, {WEST, {0, -1}}};
-
-using Tile = char;
 
 constexpr Tile NOTHING = '.';
 constexpr Tile ROBOT = '@';

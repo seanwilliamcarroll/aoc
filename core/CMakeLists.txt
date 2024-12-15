@@ -1,7 +1,7 @@
 project(core VERSION 0.0.1)
 
 add_library(core STATIC
-  src/file_io.cpp
+  src/core_lib.cpp
 )
 
 set_target_properties(core

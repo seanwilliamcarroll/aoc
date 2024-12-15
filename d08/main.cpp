@@ -1,6 +1,6 @@
 #include <_ctype.h>      // for isalnum
 #include <cctype>        // for isalnum
-#include <file_io.hpp>   // for get_lines_from_file
+#include <core_lib.hpp>  // for get_lines_from_file
 #include <iostream>      // for basic_ostream, endl, operator<<, cout, cerr
 #include <set>           // for set
 #include <stddef.h>      // for size_t
@@ -9,13 +9,7 @@
 #include <utility>       // for make_pair, pair
 #include <vector>        // for vector
 
-using Coordinate = int;
-
-using Position = std::pair<Coordinate, Coordinate>;
-
-using AntennaMap = std::vector<std::string>;
-
-using Tile = char;
+using AntennaMap = Grid;
 
 using Antenna = Tile;
 
@@ -66,12 +60,6 @@ Position get_antinode_position(const Position &base, const Position &second) {
       get_antinode_position_diff(base, second);
   return std::make_pair(base_row + antinode_diff_row,
                         base_col + antinode_diff_col);
-}
-
-bool is_in_bounds(const AntennaMap &antenna_map, const Position &position) {
-  const auto [position_row, position_col] = position;
-  return (position_row >= 0 && position_row < antenna_map.size() &&
-          position_col >= 0 && position_col < antenna_map.back().size());
 }
 
 int count_unique_antinode_positions(const AntennaMap &antenna_map,

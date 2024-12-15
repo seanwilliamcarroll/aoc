@@ -1,30 +1,25 @@
-#include <array>       // for array
-#include <file_io.hpp> // for get_lines_from_file
-#include <iostream>    // for basic_ostream, operator<<, endl, cout, cerr
-#include <set>         // for set
-#include <stddef.h>    // for size_t
-#include <stdexcept>   // for runtime_error
-#include <string>      // for basic_string, char_traits, operator+, string
-#include <utility>     // for pair, make_pair
-#include <vector>      // for vector
+#include <array>        // for array
+#include <core_lib.hpp> // for Grid, Tile, Position, is_in_bounds, get_lines...
+#include <iostream>     // for basic_ostream, operator<<, endl, cout, cerr
+#include <set>          // for set
+#include <stddef.h>     // for size_t
+#include <stdexcept>    // for runtime_error
+#include <string>       // for basic_string, char_traits, operator+, string
+#include <utility>      // for pair, make_pair
 
-using Grid = std::vector<std::string>;
-
-using Coordinates = std::pair<int, int>;
-
-constexpr char OBSTACLE = '#';
+constexpr Tile OBSTACLE = '#';
 
 constexpr size_t NUM_DIRECTIONS = 4;
 
 // Listed in order of turning
-constexpr std::array<char, NUM_DIRECTIONS> GUARD_TILES = {'^', '>', 'v', '<'};
+constexpr std::array<Tile, NUM_DIRECTIONS> GUARD_TILES = {'^', '>', 'v', '<'};
 
-constexpr std::array<Coordinates, NUM_DIRECTIONS> GUARD_MOVEMENTS = {
+constexpr std::array<Position, NUM_DIRECTIONS> GUARD_MOVEMENTS = {
     {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}};
 
-constexpr char VISITED = 'X';
+constexpr Tile VISITED = 'X';
 
-Coordinates get_guard_movement(const char guard_tile) {
+Position get_guard_movement(const Tile guard_tile) {
   for (size_t pos = 0; pos < GUARD_TILES.size(); ++pos) {
     if (GUARD_TILES[pos] == guard_tile) {
       return GUARD_MOVEMENTS[pos];
@@ -34,10 +29,10 @@ Coordinates get_guard_movement(const char guard_tile) {
                            guard_tile);
 }
 
-Coordinates find_guard(const Grid &grid) {
+Position find_guard(const Grid &grid) {
   for (int row_index = 0; row_index < grid.size(); ++row_index) {
     for (int col_index = 0; col_index < grid[row_index].size(); ++col_index) {
-      const char current_space = grid[row_index][col_index];
+      const Tile current_space = grid[row_index][col_index];
       if (current_space == GUARD_TILES[0] || current_space == GUARD_TILES[1] ||
           current_space == GUARD_TILES[2] || current_space == GUARD_TILES[3]) {
         return std::make_pair(row_index, col_index);
@@ -48,12 +43,7 @@ Coordinates find_guard(const Grid &grid) {
   return std::make_pair(0, 0);
 }
 
-bool in_bounds(const Grid &grid, const int row_index, const int col_index) {
-  return (row_index >= 0 && row_index < grid.size() && col_index >= 0 &&
-          col_index < grid.back().size());
-}
-
-char rotate_guard(const char guard_tile) {
+Tile rotate_guard(const Tile guard_tile) {
   size_t pos{};
   while (pos < NUM_DIRECTIONS && GUARD_TILES[pos] != guard_tile) {
     ++pos;
@@ -61,12 +51,12 @@ char rotate_guard(const char guard_tile) {
   return GUARD_TILES[((pos + 1) % NUM_DIRECTIONS)];
 }
 
-char simulate_guard(Grid &grid) {
-  Coordinates starting_position = find_guard(grid);
+Tile simulate_guard(Grid &grid) {
+  Position starting_position = find_guard(grid);
   int row_index(starting_position.first);
   int col_index(starting_position.second);
-  std::set<std::pair<char, Coordinates>> visited;
-  while (in_bounds(grid, row_index, col_index)) {
+  std::set<std::pair<Tile, Position>> visited;
+  while (is_in_bounds(grid, row_index, col_index)) {
     const auto guard_tile = grid[row_index][col_index];
     const auto current_heading =
         std::make_pair(guard_tile, std::make_pair(row_index, col_index));
@@ -76,7 +66,7 @@ char simulate_guard(Grid &grid) {
     const auto next_movement = get_guard_movement(guard_tile);
     const auto next_row_index = row_index + next_movement.first;
     const auto next_col_index = col_index + next_movement.second;
-    if (!in_bounds(grid, next_row_index, next_col_index)) {
+    if (!is_in_bounds(grid, next_row_index, next_col_index)) {
       grid[row_index][col_index] = VISITED;
       return VISITED;
     }
@@ -108,7 +98,7 @@ size_t count_visited(const Grid &grid) {
   size_t total_visited{};
   for (int row_index = 0; row_index < grid.size(); ++row_index) {
     for (int col_index = 0; col_index < grid[row_index].size(); ++col_index) {
-      const char current_space = grid[row_index][col_index];
+      const Tile current_space = grid[row_index][col_index];
       if (current_space == VISITED) {
         ++total_visited;
       }
@@ -133,7 +123,7 @@ size_t count_new_obstacle_candidates(const Grid &original_grid,
   for (int row_index = 0; row_index < visited_grid.size(); ++row_index) {
     for (int col_index = 0; col_index < visited_grid[row_index].size();
          ++col_index) {
-      const char current_space = visited_grid[row_index][col_index];
+      const Tile current_space = visited_grid[row_index][col_index];
       if (!contains_guard(original_grid, row_index, col_index) &&
           current_space == VISITED) {
         scratch_grid = original_grid;
