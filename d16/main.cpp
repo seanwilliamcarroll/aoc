@@ -4,12 +4,12 @@
 #include <iostream>     // for basic_ostream, endl, operator<<, cerr, cout
 #include <limits>       // for numeric_limits
 #include <map>          // for map
-#include <stdexcept>    // for runtime_error
-#include <string>       // for char_traits, basic_string
-#include <tuple>        // for make_tuple, tuple
-#include <utility>      // for pair
+#include <set>
+#include <stdexcept> // for runtime_error
+#include <string>    // for char_traits, basic_string
+#include <tuple>     // for make_tuple, tuple
+#include <utility>   // for pair
 
-// constexpr Tile NOTHING = '.';
 constexpr Tile START = 'S';
 constexpr Tile WALL = '#';
 constexpr Tile END = 'E';
@@ -43,30 +43,41 @@ HeadingPosition find_start_position(const Grid &grid) {
   throw std::runtime_error("Expected to find start position!");
 }
 
-Score find_shortest_path(const Grid &grid) {
+std::pair<Score, Score> find_shortest_path(const Grid &grid) {
   const auto starting_position = find_start_position(grid);
 
-  using IntermediateResult = std::pair<Score, HeadingPosition>;
+  // At any time, we want to know where we just came from
+  using IntermediateResult =
+      std::tuple<Score, HeadingPosition, HeadingPosition>;
 
   std::deque<IntermediateResult> attempts;
   Score lowest_score = std::numeric_limits<Score>::max();
   std::map<HeadingPosition, Score> position_to_score;
+  std::map<HeadingPosition, std::set<HeadingPosition>>
+      position_to_last_position;
+  std::set<HeadingPosition> end_positions;
 
-  attempts.emplace_back(0, starting_position);
+  attempts.emplace_back(0, starting_position, starting_position);
   while (!attempts.empty()) {
     const auto &attempt = attempts.front();
-    const auto [score_so_far, position] = attempt;
+    const auto [score_so_far, position, last_position] = attempt;
     attempts.pop_front();
     const auto [heading, row, col] = position;
     if (grid[row][col] == END) {
       // Found the end
       if (score_so_far < lowest_score) {
         lowest_score = score_so_far;
+        end_positions = std::set<HeadingPosition>{position};
+        position_to_last_position[position] =
+            std::set<HeadingPosition>{last_position};
+      } else if (score_so_far == lowest_score) {
+        end_positions.insert(position);
+        position_to_last_position[position].insert(last_position);
       }
       continue;
     }
     if ((position_to_score[position] != Score() &&
-         position_to_score[position] <= score_so_far) ||
+         position_to_score[position] < score_so_far) ||
         score_so_far >= lowest_score) {
       // visited and we've seen this score or better
       // Or we've already gone past the best so far
@@ -80,25 +91,49 @@ Score find_shortest_path(const Grid &grid) {
     // Can either take a step forward for cost of 1
     if (grid[new_row][new_col] != WALL) {
       attempts.emplace_back(score_so_far + 1,
-                            std::make_tuple(heading, new_row, new_col));
+                            std::make_tuple(heading, new_row, new_col),
+                            position);
     }
 
     // Or rotate for a cost of 1000
     {
       const auto new_heading = (heading + 1) % NUM_DIRECTIONS;
       attempts.emplace_back(score_so_far + 1000,
-                            std::make_tuple(new_heading, row, col));
+                            std::make_tuple(new_heading, row, col), position);
     }
     {
       const auto new_heading = (NUM_DIRECTIONS + heading - 1) % NUM_DIRECTIONS;
       attempts.emplace_back(score_so_far + 1000,
-                            std::make_tuple(new_heading, row, col));
+                            std::make_tuple(new_heading, row, col), position);
     }
 
-    position_to_score[position] = score_so_far;
+    if (position_to_score[position] == Score() ||
+        score_so_far < position_to_score[position]) {
+      position_to_score[position] = score_so_far;
+      position_to_last_position[position] =
+          std::set<HeadingPosition>{last_position};
+    } else if (score_so_far == position_to_score[position]) {
+      position_to_last_position[position].insert(last_position);
+    }
   }
 
-  return lowest_score;
+  std::set<Position> best_seats;
+  std::deque<HeadingPosition> seats;
+  seats.insert(seats.end(), end_positions.begin(), end_positions.end());
+  while (!seats.empty()) {
+    const auto &seat = seats.front();
+    best_seats.insert(std::make_pair(std::get<1>(seat), std::get<2>(seat)));
+    for (const auto &last_seat : position_to_last_position[seat]) {
+      if (last_seat != starting_position) {
+        seats.push_back(last_seat);
+      }
+    }
+    seats.pop_front();
+  }
+  best_seats.insert(std::make_pair(std::get<1>(starting_position),
+                                   std::get<2>(starting_position)));
+
+  return std::make_pair(lowest_score, best_seats.size());
 }
 
 int main(int argc, char *argv[]) {
@@ -110,11 +145,11 @@ int main(int argc, char *argv[]) {
 
   const auto grid = get_lines_from_file(argv[1]);
 
-  // print_lines(grid);
+  const auto [part_1, part_2] = find_shortest_path(grid);
 
-  Score accumulator = find_shortest_path(grid);
+  std::cout << "Part 1: Score: " << part_1 << std::endl;
 
-  std::cout << "Part 1: Score: " << accumulator << std::endl;
+  std::cout << "Part 2: Score: " << part_2 << std::endl;
 
   return 0;
 }
