@@ -243,10 +243,9 @@ c_ProgramState simulate_program(const c_ProgramState &input_program_state) {
 
 void add_new_values_to_try(const Value new_value,
                            std::deque<Value> &next_to_try) {
-  // Try the new value, plus that value with the values [1, 8] added to it, since we're mod 8
+  // Try the new value, plus that value with the values [1, 8] added to it,
+  // since we're mod 8
 
-
-  
   for (Value next_value = new_value; next_value < new_value + 8; ++next_value) {
     next_to_try.push_front(next_value);
   }
