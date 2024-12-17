@@ -1,17 +1,17 @@
+#include <array>        // for array
 #include <core_lib.hpp> // for greet_day
 #include <fstream>      // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>     // for cout, cerr
 #include <stddef.h>     // for size_t
 #include <stdexcept>    // for runtime_error
-#include <stdint.h>     // for uint8_t
-#include <string>       // for char_traits, string, operator+, to_string, stoi
-#include <vector>       // for vector
+#include <string>       // for char_traits, allocator, string, operator+
+#include <vector>       // for vector, operator==
 
 using Value = long long;
 
 using Register = Value;
 
-using Instruction = uint8_t;
+using Instruction = Value;
 
 using Instructions = std::vector<Instruction>;
 
@@ -25,6 +25,37 @@ constexpr Instruction BXC = 4;
 constexpr Instruction OUT = 5;
 constexpr Instruction BDV = 6;
 constexpr Instruction CDV = 7;
+
+constexpr size_t NUM_INSTRUCTIONS = 8;
+
+constexpr std::array<const char *, NUM_INSTRUCTIONS> INSTRUCTION_NAMES = {
+    "ADV", "BXL", "BST", "JNZ", "BXC", "OUT", "BDV", "CDV"};
+
+void print_instructions(const Instructions &instructions) {
+  for (size_t index{}; index < instructions.size() - 1; index += 2) {
+    std::cout << INSTRUCTION_NAMES[instructions[index]] << " "
+              << instructions[index + 1] << std::endl;
+  }
+}
+
+template <typename SequenceType>
+void print_sequence(const SequenceType &input, const std::string &identifier) {
+  bool first = true;
+  std::cout << identifier << "[" << input.size() << "]: ";
+  for (const auto element : input) {
+    if (!first) {
+      std::cout << ",";
+    }
+    std::cout << Value(element);
+    first = false;
+  }
+
+  std::cout << std::endl;
+}
+
+struct ProgramState;
+
+void print_program_state(const ProgramState &program_state);
 
 struct ProgramState {
   Register m_A;
@@ -58,7 +89,6 @@ struct ProgramState {
                               const Value operand) {
     switch (instruction) {
     case ADV: {
-      // std::cout << "ADV: " << operand << std::endl;
       m_A = m_A / (1LL << combo_operand(operand));
       break;
     };
@@ -104,16 +134,30 @@ struct ProgramState {
   }
 
   void simulate() {
-    // std::cout << "Next PC: " << m_ProgramCounter << std::endl;
     while (m_ProgramCounter < m_Instructions.size() - 1) {
       Instruction current_instruction = m_Instructions[m_ProgramCounter];
       Value operand = m_Instructions[m_ProgramCounter + 1];
       size_t next_offset = simulate_instruction(current_instruction, operand);
       m_ProgramCounter += next_offset;
-      // std::cout << "Next PC: " << m_ProgramCounter << std::endl;
     }
   }
+
 };
+
+void print_program_state(const ProgramState &program_state) {
+  std::cout << "ProgramCounter: " << program_state.m_ProgramCounter << std::endl
+            << std::endl;
+
+  std::cout << "Register A: " << program_state.m_A << std::endl;
+  std::cout << "Register B: " << program_state.m_B << std::endl;
+  std::cout << "Register C: " << program_state.m_C << std::endl;
+
+  std::cout << std::endl;
+
+  print_sequence(program_state.m_Instructions, "Instructions");
+  print_sequence(program_state.m_Output, "Output");
+  std::cout << std::endl;
+}
 
 Register parse_register(const std::string &line) {
   size_t pos = line.find(":");
@@ -134,7 +178,7 @@ Instructions parse_instructions(const std::string &line) {
     if (comma == std::string::npos) {
       comma = line.size();
     }
-    Instruction instruction = std::stoi(line.substr(pos, comma - pos));
+    Instruction instruction = std::stoll(line.substr(pos, comma - pos));
     instructions.push_back(instruction);
     pos = comma + 1;
   }
@@ -179,45 +223,68 @@ ProgramState get_program_state_from_file(const std::string &filepath) {
   return program_state;
 }
 
-template <typename SequenceType>
-void print_sequence(const SequenceType& input, const std::string& identifier) {
-  bool first = true;
-  std::cout << identifier << "[" << input.size() << "]: ";
-  for (const auto element : input) {
-    if (!first) {
-      std::cout << ",";
-    }
-    std::cout << Value(element);
-    first = false;
-  }
-
-  std::cout << std::endl;
-
-}
-
-void print_program_state(const ProgramState &program_state) {
-  std::cout << "ProgramCounter: " << program_state.m_ProgramCounter << std::endl
-            << std::endl;
-
-  std::cout << "Register A: " << program_state.m_A << std::endl;
-  std::cout << "Register B: " << program_state.m_B << std::endl;
-  std::cout << "Register C: " << program_state.m_C << std::endl;
-
-  std::cout << std::endl;
-
-  print_sequence(program_state.m_Instructions, "Instructions");
-  print_sequence(program_state.m_Output, "Output");
-  std::cout << std::endl;
-}
-
-
-
 ProgramState simulate_program(const ProgramState &input_program_state) {
   ProgramState program_state(input_program_state);
 
   program_state.simulate();
 
   return program_state;
+}
+
+Value find_lowest_value_for_quine(const ProgramState &input_program_state) {
+  // Need to do some form of search....
+
+  // FIXM: This is super gross, need to understand what is actually going on here....
+
+  Value A_reg = 0;
+  while (true) {
+    ProgramState program_state(input_program_state);
+    program_state.m_A = A_reg;
+    program_state.simulate();
+    if (program_state.m_Output.size() ==
+        input_program_state.m_Instructions.size()) {
+      bool found = true;
+      for (size_t index = 0; index < program_state.m_Output.size(); ++index) {
+        if (program_state.m_Output[index] !=
+            input_program_state.m_Instructions[index]) {
+          found = false;
+        }
+      }
+      if (found) {
+        print_program_state(program_state);
+        return A_reg;
+      }
+      ++A_reg;
+    } else {
+      int num_match = 0;
+      for (int index = program_state.m_Output.size() - 1; index >= 0 ; --index) {
+        const int offset = input_program_state.m_Instructions.size() -
+                              program_state.m_Output.size();
+        if (program_state.m_Output[index] ==
+            input_program_state.m_Instructions[index + offset]) {
+          ++num_match;
+        } else {
+          break;
+        }
+      }
+      if (num_match == program_state.m_Output.size()) {
+        print_program_state(program_state);
+        std::cout << "MATCH A_reg " << A_reg
+                  << " length: " << program_state.m_Output.size();
+        std::cout << " (octal) " << std::oct << A_reg << std::dec << std::endl;
+        A_reg = (A_reg * 8) - 8;
+      } else {
+        if (num_match == program_state.m_Output.size() - 1) {
+          std::cout << "no match A_reg " << A_reg
+                    << " length: " << program_state.m_Output.size();
+          std::cout << " (octal) " << std::oct << A_reg << std::dec << std::endl;
+        }
+        ++A_reg;
+      }
+    }
+  }
+
+  return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -238,6 +305,11 @@ int main(int argc, char *argv[]) {
   std::cout << "Part 1: ";
   print_sequence(output_program_state.m_Output, "Output");
 
+  print_instructions(program_state.m_Instructions);
+
+  Value accumulator = find_lowest_value_for_quine(program_state);
+
+  std::cout << "Part 2: " << accumulator << std::endl;
 
   return 0;
 }
