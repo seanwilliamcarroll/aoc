@@ -92,7 +92,7 @@ Value c_ProgramState::combo_operand(const Value operand) const {
 }
 
 size_t c_ProgramState::simulate_instruction(const Instruction instruction,
-                                          const Value operand) {
+                                            const Value operand) {
   switch (instruction) {
   case ADV: {
     m_A = m_A / (1LL << combo_operand(operand));
