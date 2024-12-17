@@ -1,14 +1,14 @@
-#include <array>         // for array
-#include <core_lib.hpp>  // for Coordinate, Tile, Grid, Position, get_lines_...
-#include <deque>         // for deque
-#include <iostream>      // for basic_ostream, endl, operator<<, cout, cerr
-#include <limits>        // for numeric_limits
-#include <set>           // for set, operator!=, __tree_const_iterator
-#include <stdexcept>     // for runtime_error
-#include <string>        // for char_traits, basic_string
-#include <tuple>         // for get, tuple, make_tuple, operator==
-#include <utility>       // for pair, make_pair
-#include <vector>        // for vector
+#include <array>        // for array
+#include <core_lib.hpp> // for Coordinate, Tile, Grid, Position, get_lines_...
+#include <deque>        // for deque
+#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
+#include <limits>       // for numeric_limits
+#include <set>          // for set, operator!=, __tree_const_iterator
+#include <stdexcept>    // for runtime_error
+#include <string>       // for char_traits, basic_string
+#include <tuple>        // for get, tuple, make_tuple, operator==
+#include <utility>      // for pair, make_pair
+#include <vector>       // for vector
 
 constexpr Tile START = 'S';
 constexpr Tile WALL = '#';
@@ -154,7 +154,7 @@ std::pair<Score, Score> find_shortest_path(const Grid &grid) {
 }
 
 int main(int argc, char *argv[]) {
-  greet_day(15);
+  greet_day(16);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
