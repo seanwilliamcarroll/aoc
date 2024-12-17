@@ -1,11 +1,14 @@
+#include <algorithm>    // for min_element
 #include <array>        // for array
-#include <core_lib.hpp> // for greet_day
+#include <core_lib.hpp> // for do_assert, greet_day
+#include <deque>        // for deque
 #include <fstream>      // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>     // for cout, cerr
+#include <sstream>      // for basic_stringstream, stringstream
 #include <stddef.h>     // for size_t
 #include <stdexcept>    // for runtime_error
-#include <string>       // for char_traits, allocator, string, operator+
-#include <vector>       // for vector, operator==
+#include <string>       // for char_traits, string, allocator, operator+
+#include <vector>       // for vector
 
 using Value = long long;
 
@@ -31,33 +34,7 @@ constexpr size_t NUM_INSTRUCTIONS = 8;
 constexpr std::array<const char *, NUM_INSTRUCTIONS> INSTRUCTION_NAMES = {
     "ADV", "BXL", "BST", "JNZ", "BXC", "OUT", "BDV", "CDV"};
 
-void print_instructions(const Instructions &instructions) {
-  for (size_t index{}; index < instructions.size() - 1; index += 2) {
-    std::cout << INSTRUCTION_NAMES[instructions[index]] << " "
-              << instructions[index + 1] << std::endl;
-  }
-}
-
-template <typename SequenceType>
-void print_sequence(const SequenceType &input, const std::string &identifier) {
-  bool first = true;
-  std::cout << identifier << "[" << input.size() << "]: ";
-  for (const auto element : input) {
-    if (!first) {
-      std::cout << ",";
-    }
-    std::cout << Value(element);
-    first = false;
-  }
-
-  std::cout << std::endl;
-}
-
-struct ProgramState;
-
-void print_program_state(const ProgramState &program_state);
-
-struct ProgramState {
+struct c_ProgramState {
   Register m_A;
   Register m_B;
   Register m_C;
@@ -68,83 +45,116 @@ struct ProgramState {
 
   Values m_Output;
 
-  Value combo_operand(const Value operand) {
-    if (operand <= 3) {
-      return operand;
-    }
-    if (operand == 4) {
-      return m_A;
-    }
-    if (operand == 5) {
-      return m_B;
-    }
-    if (operand == 6) {
-      return m_C;
-    }
-    throw std::runtime_error(std::string("Invalid combo operand: ") +
-                             std::to_string(operand));
-  }
+  Value combo_operand(const Value operand) const;
 
   size_t simulate_instruction(const Instruction instruction,
-                              const Value operand) {
-    switch (instruction) {
-    case ADV: {
-      m_A = m_A / (1LL << combo_operand(operand));
-      break;
-    };
-    case BXL: {
-      m_B = m_B ^ operand;
-      break;
-    };
-    case BST: {
-      m_B = combo_operand(operand) % 8;
-      break;
-    };
-    case JNZ: {
-      if (m_A != 0) {
-        m_ProgramCounter = operand;
-        return 0;
-      }
-      break;
-    };
-    case BXC: {
-      m_B = m_B ^ m_C;
-      break;
-    };
-    case OUT: {
-      m_Output.push_back(combo_operand(operand) % 8);
-      break;
-    };
-    case BDV: {
-      m_B = m_A / (1LL << combo_operand(operand));
-      break;
-    };
-    case CDV: {
-      m_C = m_A / (1LL << combo_operand(operand));
-      break;
-    };
-    default: {
-      throw std::runtime_error(std::string("Unexpected instruction: ") +
-                               std::to_string(int(instruction)));
-      break;
-    };
-    }
+                              const Value operand);
 
-    return 2;
-  }
-
-  void simulate() {
-    while (m_ProgramCounter < m_Instructions.size() - 1) {
-      Instruction current_instruction = m_Instructions[m_ProgramCounter];
-      Value operand = m_Instructions[m_ProgramCounter + 1];
-      size_t next_offset = simulate_instruction(current_instruction, operand);
-      m_ProgramCounter += next_offset;
-    }
-  }
-
+  void simulate();
 };
 
-void print_program_state(const ProgramState &program_state) {
+void print_instructions(const Instructions &instructions) {
+  for (size_t index{}; index < instructions.size() - 1; index += 2) {
+    std::cout << INSTRUCTION_NAMES[instructions[index]] << " "
+              << instructions[index + 1] << std::endl;
+  }
+}
+
+template <typename SequenceType>
+std::string sequence_to_string(const SequenceType &input) {
+  std::stringstream output;
+  bool first = true;
+  for (const auto element : input) {
+    if (!first) {
+      output << ",";
+    }
+    output << Value(element);
+    first = false;
+  }
+  return output.str();
+}
+
+Value c_ProgramState::combo_operand(const Value operand) const {
+  if (operand <= 3) {
+    return operand;
+  }
+  if (operand == 4) {
+    return m_A;
+  }
+  if (operand == 5) {
+    return m_B;
+  }
+  if (operand == 6) {
+    return m_C;
+  }
+  throw std::runtime_error(std::string("Invalid combo operand: ") +
+                           std::to_string(operand));
+}
+
+size_t c_ProgramState::simulate_instruction(const Instruction instruction,
+                                          const Value operand) {
+  switch (instruction) {
+  case ADV: {
+    m_A = m_A / (1LL << combo_operand(operand));
+    break;
+  };
+  case BXL: {
+    m_B = m_B ^ operand;
+    break;
+  };
+  case BST: {
+    m_B = combo_operand(operand) % 8;
+    break;
+  };
+  case JNZ: {
+    if (m_A != 0) {
+      m_ProgramCounter = operand;
+      return 0;
+    }
+    break;
+  };
+  case BXC: {
+    m_B = m_B ^ m_C;
+    break;
+  };
+  case OUT: {
+    m_Output.push_back(combo_operand(operand) % 8);
+    break;
+  };
+  case BDV: {
+    m_B = m_A / (1LL << combo_operand(operand));
+    break;
+  };
+  case CDV: {
+    m_C = m_A / (1LL << combo_operand(operand));
+    break;
+  };
+  default: {
+    throw std::runtime_error(std::string("Unexpected instruction: ") +
+                             std::to_string(int(instruction)));
+    break;
+  };
+  }
+
+  return 2;
+}
+
+void c_ProgramState::simulate() {
+  while (m_ProgramCounter < m_Instructions.size() - 1) {
+    Instruction current_instruction = m_Instructions[m_ProgramCounter];
+    Value operand = m_Instructions[m_ProgramCounter + 1];
+    size_t next_offset = simulate_instruction(current_instruction, operand);
+    m_ProgramCounter += next_offset;
+  }
+}
+
+template <typename SequenceType>
+void print_sequence(const SequenceType &input, const std::string &identifier) {
+  std::cout << identifier << "[" << input.size()
+            << "]: " << sequence_to_string(input) << std::endl;
+}
+
+void print_program_state(const c_ProgramState &program_state) {
   std::cout << "ProgramCounter: " << program_state.m_ProgramCounter << std::endl
             << std::endl;
 
@@ -185,10 +195,10 @@ Instructions parse_instructions(const std::string &line) {
   return instructions;
 }
 
-ProgramState get_program_state_from_file(const std::string &filepath) {
+c_ProgramState get_program_state_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
 
-  ProgramState program_state;
+  c_ProgramState program_state;
 
   std::string line;
 
@@ -223,68 +233,72 @@ ProgramState get_program_state_from_file(const std::string &filepath) {
   return program_state;
 }
 
-ProgramState simulate_program(const ProgramState &input_program_state) {
-  ProgramState program_state(input_program_state);
+c_ProgramState simulate_program(const c_ProgramState &input_program_state) {
+  c_ProgramState program_state(input_program_state);
 
   program_state.simulate();
 
   return program_state;
 }
 
-Value find_lowest_value_for_quine(const ProgramState &input_program_state) {
+void add_new_values_to_try(const Value new_value,
+                           std::deque<Value> &next_to_try) {
+  for (Value next_value = new_value; next_value < new_value + 8; ++next_value) {
+    next_to_try.push_front(next_value);
+  }
+}
+
+int compare_from_back(const Values &shorter, const Values &longer) {
+  // Expect size of shorter to be less than or equal to size of longer
+  // Returns number of matches from back to front of shorter compared to back to
+  // front of longer, returning when a mismatch is found
+  int num_match = 0;
+  for (int index = shorter.size() - 1; index >= 0; --index) {
+    const int offset = longer.size() - shorter.size();
+    if (shorter[index] == longer[index + offset]) {
+      ++num_match;
+    } else {
+      break;
+    }
+  }
+  return num_match;
+}
+
+Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
   // Need to do some form of search....
 
-  // FIXM: This is super gross, need to understand what is actually going on here....
+  // Do DFS and look for all possible values
+  // Since we are mod 8 on every output, try 8 values at a time, looking for
+  // best match When we match end of sequence, multiple this value by 8 and add
+  // to front of list to try
 
-  Value A_reg = 0;
-  while (true) {
-    ProgramState program_state(input_program_state);
+  Values output;
+
+  std::deque<Value> next_to_try;
+  add_new_values_to_try(0, next_to_try);
+  while (!next_to_try.empty()) {
+    // Get next value to try
+    Value A_reg = next_to_try.front();
+    next_to_try.pop_front();
+
+    // Try it
+    c_ProgramState program_state(input_program_state);
     program_state.m_A = A_reg;
     program_state.simulate();
-    if (program_state.m_Output.size() ==
-        input_program_state.m_Instructions.size()) {
-      bool found = true;
-      for (size_t index = 0; index < program_state.m_Output.size(); ++index) {
-        if (program_state.m_Output[index] !=
-            input_program_state.m_Instructions[index]) {
-          found = false;
-        }
-      }
-      if (found) {
-        print_program_state(program_state);
-        return A_reg;
-      }
-      ++A_reg;
-    } else {
-      int num_match = 0;
-      for (int index = program_state.m_Output.size() - 1; index >= 0 ; --index) {
-        const int offset = input_program_state.m_Instructions.size() -
-                              program_state.m_Output.size();
-        if (program_state.m_Output[index] ==
-            input_program_state.m_Instructions[index + offset]) {
-          ++num_match;
-        } else {
-          break;
-        }
-      }
-      if (num_match == program_state.m_Output.size()) {
-        print_program_state(program_state);
-        std::cout << "MATCH A_reg " << A_reg
-                  << " length: " << program_state.m_Output.size();
-        std::cout << " (octal) " << std::oct << A_reg << std::dec << std::endl;
-        A_reg = (A_reg * 8) - 8;
-      } else {
-        if (num_match == program_state.m_Output.size() - 1) {
-          std::cout << "no match A_reg " << A_reg
-                    << " length: " << program_state.m_Output.size();
-          std::cout << " (octal) " << std::oct << A_reg << std::dec << std::endl;
-        }
-        ++A_reg;
-      }
+
+    // Evaluate it
+    const int num_matches = compare_from_back(
+        program_state.m_Output, input_program_state.m_Instructions);
+    if (num_matches == input_program_state.m_Instructions.size()) {
+      output.push_back(A_reg);
+    } else if (num_matches == program_state.m_Output.size()) {
+      add_new_values_to_try(A_reg * 8, next_to_try);
     }
   }
 
-  return 0;
+  do_assert(!output.empty(), "Expected to find a solution!!");
+
+  return *std::min_element(output.begin(), output.end());
 }
 
 int main(int argc, char *argv[]) {
@@ -296,16 +310,10 @@ int main(int argc, char *argv[]) {
 
   const auto program_state = get_program_state_from_file(argv[1]);
 
-  print_program_state(program_state);
-
   const auto output_program_state = simulate_program(program_state);
 
-  print_program_state(output_program_state);
-
-  std::cout << "Part 1: ";
-  print_sequence(output_program_state.m_Output, "Output");
-
-  print_instructions(program_state.m_Instructions);
+  std::cout << "Part 1: " << sequence_to_string(output_program_state.m_Output)
+            << std::endl;
 
   Value accumulator = find_lowest_value_for_quine(program_state);
 
