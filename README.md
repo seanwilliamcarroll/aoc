@@ -1,3 +1,3 @@
-# AoC 2024
+# AoC
 
-https://adventofcode.com/2024
+https://adventofcode.com
