@@ -13,6 +13,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED   ON )
 set(CMAKE_CXX_EXTENSIONS          OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        b514bdc898e2951020cbdca1304b75f5950d1f59
+)
+FetchContent_MakeAvailable(googletest)
+
+
+enable_testing()
+
 find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
 set(iwyu_path_and_options
     ${iwyu_path}
@@ -46,5 +57,7 @@ add_subdirectory(d15)
 add_subdirectory(d16)
 add_subdirectory(d17)
 add_subdirectory(d18)
+
+add_subdirectory(test)
 
 # add_subdirectory(term_app)
