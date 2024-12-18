@@ -70,29 +70,21 @@ Grid simulate_n_bytes_falling(const Positions &positions,
 }
 
 size_t find_length_shortest_path(const Grid &grid) {
-
   using IntermediateResult = std::pair<size_t, Position>;
 
   std::deque<IntermediateResult> attempts;
-
   attempts.emplace_back(0, START);
-
-  size_t shortest_path = std::numeric_limits<size_t>::max();
 
   std::vector<std::vector<size_t>> shortest_so_far(
       GRID_HEIGHT, std::vector(GRID_WIDTH, std::numeric_limits<size_t>::max()));
 
   while (!attempts.empty()) {
     const auto [path_length, position] = attempts.front();
-
     attempts.pop_front();
     if (position == END) {
-      if (path_length < shortest_path) {
-        shortest_path = path_length;
-      }
       continue;
     }
-    if (path_length > shortest_path) {
+    if (path_length > shortest_so_far[END.first][END.second]) {
       continue;
     }
     const auto [row, col] = position;
@@ -112,7 +104,7 @@ size_t find_length_shortest_path(const Grid &grid) {
       attempts.emplace_back(path_length + 1, std::make_pair(new_row, new_col));
     }
   }
-  return shortest_path;
+  return shortest_so_far[END.first][END.second];
 }
 
 size_t simulate_and_solve(const Positions &positions) {
@@ -135,7 +127,7 @@ size_t simulate_to_failure(const Positions &positions) {
 }
 
 int main(int argc, char *argv[]) {
-  greet_day(17);
+  greet_day(18);
   if (argc <= 1) {
     std::cerr << "Must provide filepath!" << std::endl;
     return -1;
