@@ -1,11 +1,13 @@
 #include <array>        // for array
-#include <core_lib.hpp> // for Coordinate, Position, Grid, greet_day, is_in...
+#include <core_lib.hpp> // for Position, Coordinate, Grid, Matrix2D, greet_day
 #include <deque>        // for deque
 #include <fstream>      // for basic_ostream, endl, operator<<, basic_istream
 #include <iostream>     // for cout, cerr
 #include <limits>       // for numeric_limits
+#include <set>          // for set
 #include <stddef.h>     // for size_t
 #include <string>       // for char_traits, basic_string, string
+#include <tuple>        // for tuple
 #include <utility>      // for pair, make_pair, operator==
 #include <vector>       // for vector
 
@@ -27,6 +29,9 @@ constexpr std::array<Movement, NUM_DIRECTIONS> MOVEMENTS = {
     {{-1, 0}, {0, 1}, {1, 0}, {0, -1}}};
 
 constexpr size_t ONE_KILOBYTE = 1024;
+
+using PathLocations = Matrix2D<Position>;
+using PathLengths = Matrix2D<size_t>;
 
 Positions get_positions_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
@@ -69,14 +74,18 @@ Grid simulate_n_bytes_falling(const Positions &positions,
   return grid;
 }
 
-size_t find_length_shortest_path(const Grid &grid) {
-  using IntermediateResult = std::pair<size_t, Position>;
+std::pair<PathLocations, PathLengths> find_shortest_paths(const Grid &grid) {
+  using IntermediateResult = std::tuple<size_t, Position>;
 
   std::deque<IntermediateResult> attempts;
   attempts.emplace_back(0, START);
 
-  std::vector<std::vector<size_t>> shortest_so_far(
-      GRID_HEIGHT, std::vector(GRID_WIDTH, std::numeric_limits<size_t>::max()));
+  PathLengths shortest_so_far(
+      GRID_HEIGHT,
+      std::vector<size_t>(GRID_WIDTH, std::numeric_limits<size_t>::max()));
+
+  PathLocations last_position(
+      GRID_HEIGHT, std::vector<Position>(GRID_WIDTH, std::make_pair(-1, -1)));
 
   while (!attempts.empty()) {
     const auto [path_length, position] = attempts.front();
@@ -101,10 +110,21 @@ size_t find_length_shortest_path(const Grid &grid) {
         continue;
       }
       shortest_so_far[new_row][new_col] = path_length + 1;
+      last_position[new_row][new_col] = position;
       attempts.emplace_back(path_length + 1, std::make_pair(new_row, new_col));
     }
   }
-  return shortest_so_far[END.first][END.second];
+
+  return std::make_pair(last_position, shortest_so_far);
+}
+
+size_t find_length_shortest_path(const Grid &grid) {
+  const auto [_, shortest_paths] = find_shortest_paths(grid);
+  return shortest_paths[END.first][END.second];
+}
+
+size_t find_length_shortest_path(const PathLengths &shortest_paths) {
+  return shortest_paths[END.first][END.second];
 }
 
 size_t simulate_and_solve(const Positions &positions) {
@@ -112,14 +132,42 @@ size_t simulate_and_solve(const Positions &positions) {
   return find_length_shortest_path(grid);
 }
 
+std::set<Position> find_shortest_path(const PathLocations &last_position) {
+  std::set<Position> shortest_path;
+  shortest_path.insert(END);
+  shortest_path.insert(START);
+  auto position = END;
+  while (position != START) {
+    const auto [row, col] = position;
+    const auto next_position = last_position[row][col];
+    shortest_path.insert(position);
+    position = next_position;
+  }
+  return shortest_path;
+}
+
 size_t simulate_to_failure(const Positions &positions) {
   size_t bytes_so_far = ONE_KILOBYTE + 1;
   auto grid = simulate_n_bytes_falling(positions, bytes_so_far);
-  size_t shortest_path = find_length_shortest_path(grid);
+  auto [last_position, shortest_paths] = find_shortest_paths(grid);
+  size_t shortest_path_length = find_length_shortest_path(shortest_paths);
+
+  std::set<Position> shortest_path = find_shortest_path(last_position);
+
   while (bytes_so_far < positions.size() &&
-         shortest_path != std::numeric_limits<size_t>::max()) {
+         shortest_path_length != std::numeric_limits<size_t>::max()) {
     simulate_n_more_bytes_falling(grid, positions, bytes_so_far, 1);
-    shortest_path = find_length_shortest_path(grid);
+    // Only do a new search when we have positions that fall on our current
+    // shortest path
+    if (shortest_path.count(positions[bytes_so_far]) > 0) {
+      auto path_pair = find_shortest_paths(grid);
+      last_position = path_pair.first;
+      shortest_paths = path_pair.second;
+      shortest_path_length = find_length_shortest_path(shortest_paths);
+      if (shortest_path_length != std::numeric_limits<size_t>::max()) {
+        shortest_path = find_shortest_path(last_position);
+      }
+    }
     ++bytes_so_far;
   }
 
