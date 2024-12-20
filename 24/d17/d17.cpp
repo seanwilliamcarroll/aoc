@@ -1,14 +1,15 @@
 #include <algorithm>    // for min_element
 #include <array>        // for array
-#include <core_lib.hpp> // for do_assert, greet_day
+#include <core_lib.hpp> // for do_assert
 #include <d17.hpp>
 #include <deque>     // for deque
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
-#include <iostream>  // for cout, cerr
+#include <iostream>  // for cout
 #include <sstream>   // for basic_stringstream, stringstream
 #include <stddef.h>  // for size_t
 #include <stdexcept> // for runtime_error
-#include <string>    // for char_traits, string, allocator, operator+
+#include <stdint.h>  // for int64_t
+#include <string>    // for char_traits, string, allocator, to_string
 #include <vector>    // for vector
 
 namespace d17 {

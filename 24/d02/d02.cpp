@@ -1,5 +1,5 @@
 #include <_stdlib.h> // for abs
-#include <cmath>     // for abs
+#include <cmath>     // IWYU pragma: keep
 #include <cstdlib>   // for size_t
 #include <d02.hpp>
 #include <fstream> // for basic_istream, basic_ifstream, getline, ifstream
