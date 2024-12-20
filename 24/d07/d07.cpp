@@ -1,12 +1,14 @@
-#include <cmath>        // for floor, log10
-#include <core_lib.hpp> // for greet_day
-#include <deque>        // for deque, __deque_iterator
-#include <fstream>      // for basic_ostream, operator<<, endl, basic_istream
-#include <iostream>     // for cout, cerr
-#include <stddef.h>     // for size_t
-#include <string>       // for char_traits, stoull, string
-#include <utility>      // for make_pair, pair
-#include <vector>       // for vector
+#include <d07.hpp>
+#include <stddef.h>  // for size_t
+#include <cmath>     // for floor, log10, pow
+#include <deque>     // for deque, __deque_iterator
+#include <fstream>   // for basic_ostream, operator<<, basic_istream, endl
+#include <iostream>  // for cout
+#include <string>    // for char_traits, string, stoull, to_string
+#include <utility>   // for pair, make_pair
+#include <vector>    // for vector
+
+namespace d07 {
 
 using TestValue = unsigned long long;
 
@@ -140,25 +142,26 @@ TestValue sum_valid_results(const Equations &equations, const bool is_part_2,
   return accumulator;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(7);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const auto equations = get_equations_from_file(argv[1]);
+  const auto equations = get_equations_from_file(filepath);
 
   bool is_part_2 = false;
 
   TestValue accumulator = sum_valid_results(equations, is_part_2);
 
-  std::cout << "Part 1: Sum: " << accumulator << std::endl;
-
-  is_part_2 = true;
-  accumulator = sum_valid_results(equations, is_part_2);
-
-  std::cout << "Part 2: Sum: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+
+  const auto equations = get_equations_from_file(filepath);
+
+  bool is_part_2 = true;
+
+  TestValue accumulator = sum_valid_results(equations, is_part_2);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d07

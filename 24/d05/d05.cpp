@@ -1,16 +1,18 @@
-#include <__hash_table> // for __hash_const_iterator
-#include <_ctype.h>     // for isdigit
-#include <cctype>       // for isdigit
-#include <core_lib.hpp>
-#include <fstream>       // for basic_ostream, basic_istream, endl, operator<<
-#include <iostream>      // for cout, cerr
-#include <stddef.h>      // for size_t
-#include <stdexcept>     // for runtime_error
-#include <string>        // for char_traits, string, stoi
-#include <unordered_map> // for unordered_map, operator==, __hash_map_const...
-#include <unordered_set> // for unordered_set
-#include <utility>       // for make_pair, pair
-#include <vector>        // for vector
+#include <d05.hpp>
+#include <_ctype.h>       // for isdigit
+#include <stddef.h>       // for size_t
+#include <__hash_table>   // for __hash_const_iterator
+#include <cctype>         // for isdigit
+#include <fstream>        // for basic_istream, basic_ifstream, getline, bas...
+#include <iostream>       // for cout
+#include <stdexcept>      // for runtime_error
+#include <string>         // for char_traits, string, stoi, to_string
+#include <unordered_map>  // for operator==, __hash_map_const_iterator, __ha...
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for make_pair, pair
+#include <vector>         // for vector
+
+namespace d05 {
 
 // A RuleSet consists of all page numbers that may not come before the page in
 // question
@@ -199,28 +201,31 @@ int sum_middle_pages(const PageOrders &page_orders) {
   return accumulator;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(5);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const auto [all_rules, page_orders] = get_rules_and_pages_from_file(argv[1]);
+  const auto [all_rules, page_orders] = get_rules_and_pages_from_file(filepath);
 
   const auto [valid_page_orders, invalid_page_orders] =
       find_valid_and_invalid_page_orders(page_orders, all_rules);
 
   int accumulator = sum_middle_pages(valid_page_orders);
 
-  std::cout << "Part 1: Sum: " << accumulator << std::endl;
+  return std::to_string(accumulator);
+}
+
+std::string part_2(const std::string &filepath) {
+
+  const auto [all_rules, page_orders] = get_rules_and_pages_from_file(filepath);
+
+  const auto [valid_page_orders, invalid_page_orders] =
+      find_valid_and_invalid_page_orders(page_orders, all_rules);
 
   PageOrders fixed_page_orders =
       fix_invalid_page_orders(invalid_page_orders, all_rules);
 
-  accumulator = sum_middle_pages(fixed_page_orders);
+  int accumulator = sum_middle_pages(fixed_page_orders);
 
-  std::cout << "Part 2: Sum: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+} // namespace d05

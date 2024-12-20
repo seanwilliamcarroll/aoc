@@ -1,11 +1,13 @@
-#include <core_lib.hpp> // for Coordinate, Grid, Tile, Position
-#include <fstream>      // for basic_ostream, basic_istream, endl, operator<<
-#include <iostream>     // for cout, cerr
-#include <map>          // for map
-#include <set>          // for set, __tree_const_iterator
-#include <stdexcept>    // for runtime_error
-#include <string>       // for basic_string, char_traits, string
-#include <utility>      // for swap, pair, make_pair
+#include <d15.hpp>
+#include <core_lib.hpp>  // for Coordinate, Grid, Tile, Position
+#include <fstream>       // for basic_istream, basic_ifstream, getline, ifst...
+#include <map>           // for map
+#include <set>           // for set, __tree_const_iterator
+#include <stdexcept>     // for runtime_error
+#include <string>        // for basic_string, char_traits, string, to_string
+#include <utility>       // for swap, pair, make_pair
+
+namespace d15 {
 
 using Movement = Position;
 
@@ -236,30 +238,35 @@ Grid widen_grid(const Grid &input_grid) {
   return grid;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(15);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
   const auto [grid, instructions] =
-      get_grid_and_instructions_from_file(argv[1]);
+      get_grid_and_instructions_from_file(filepath);
 
   bool is_wide = false;
 
   Coordinate accumulator =
       simulate_and_get_gps_total(grid, instructions, is_wide);
 
-  std::cout << "Part 1: GPS total: " << accumulator << std::endl;
+
+  return std::to_string(accumulator);
+
+}
+
+std::string part_2(const std::string &filepath) {
+
+  const auto [grid, instructions] =
+      get_grid_and_instructions_from_file(filepath);
+
+  bool is_wide = true;
 
   const auto wide_grid = widen_grid(grid);
 
-  is_wide = true;
+  Coordinate accumulator =
+      simulate_and_get_gps_total(wide_grid, instructions, is_wide);
 
-  accumulator = simulate_and_get_gps_total(wide_grid, instructions, is_wide);
+  return std::to_string(accumulator);
 
-  std::cout << "Part 2: GPS total: " << accumulator << std::endl;
-
-  return 0;
 }
+
+} // namespace d15

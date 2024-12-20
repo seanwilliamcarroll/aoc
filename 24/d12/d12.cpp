@@ -1,14 +1,16 @@
-#include <algorithm>    // for sort
-#include <array>        // for array
-#include <core_lib.hpp> // for get_lines_from_file
-#include <deque>        // for deque
-#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
-#include <map>          // for map, __map_iterator
-#include <set>          // for set, __tree_const_iterator
-#include <stddef.h>     // for size_t
-#include <string>       // for char_traits, basic_string, string
-#include <utility>      // for pair, make_pair
-#include <vector>       // for vector
+#include <d12.hpp>
+#include <stddef.h>      // for size_t
+#include <algorithm>     // for sort
+#include <array>         // for array
+#include <core_lib.hpp>  // for Position, Coordinate, get_lines_from_file
+#include <deque>         // for deque
+#include <map>           // for map, __map_iterator
+#include <set>           // for set, __tree_const_iterator
+#include <string>        // for basic_string, string, to_string
+#include <utility>       // for pair, make_pair
+#include <vector>        // for vector
+
+namespace d12 {
 
 using Garden = Grid;
 
@@ -179,26 +181,26 @@ Unit get_total_price(const Garden &input_garden, const bool is_part_2 = false) {
   return accumulator;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(12);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const Garden garden = get_lines_from_file(argv[1]);
+  const Garden garden = get_lines_from_file(filepath);
 
   bool is_part_2 = false;
 
   Unit accumulator = get_total_price(garden, is_part_2);
 
-  std::cout << "Part 1: Price: " << accumulator << std::endl;
-
-  is_part_2 = true;
-
-  accumulator = get_total_price(garden, is_part_2);
-
-  std::cout << "Part 2: Price: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+
+  const Garden garden = get_lines_from_file(filepath);
+
+  bool is_part_2 = true;
+
+  Unit accumulator = get_total_price(garden, is_part_2);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d12

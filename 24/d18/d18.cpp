@@ -1,3 +1,4 @@
+#include <d18.hpp>
 #include <array>        // for array
 #include <core_lib.hpp> // for Position, Coordinate, Grid, Matrix2D, greet_day
 #include <deque>        // for deque
@@ -10,6 +11,9 @@
 #include <tuple>        // for tuple
 #include <utility>      // for pair, make_pair, operator==
 #include <vector>       // for vector
+
+namespace d18 {
+
 
 using Positions = std::vector<Position>;
 
@@ -174,25 +178,25 @@ size_t simulate_to_failure(const Positions &positions) {
   return bytes_so_far;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(18);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+  
+std::string part_1(const std::string &filepath) {
 
-  const auto positions = get_positions_from_file(argv[1]);
+  const auto positions = get_positions_from_file(filepath);
 
   size_t shortest_path = simulate_and_solve(positions);
 
-  std::cout << "Part 1: Shortest Path Length: " << shortest_path << std::endl;
+  return std::to_string(shortest_path);
+}
+
+std::string part_2(const std::string &filepath) {
+
+  const auto positions = get_positions_from_file(filepath);
 
   size_t number_to_fall = simulate_to_failure(positions);
 
   const auto &[row, col] = positions[number_to_fall - 1];
-
-  std::cout << "Part 2: Enclosing Corrupted Position: " << row << "," << col
-            << std::endl;
-
-  return 0;
+  
+  return std::to_string(row) + "," + std::to_string(col);
 }
+
+} // namespace d18

@@ -1,11 +1,14 @@
-#include <core_lib.hpp>
-#include <deque>    // for deque, __deque_iterator
-#include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
-#include <iostream> // for cout, cerr
-#include <stddef.h> // for size_t
-#include <string>   // for char_traits, string
-#include <utility>  // for pair, make_pair, swap
-#include <vector>   // for vector
+#include <d09.hpp>
+#include <stddef.h>  // for size_t
+#include <deque>     // for deque, __deque_iterator
+#include <fstream>   // for basic_istream, basic_ostream, endl, operator<<
+#include <iostream>  // for cout
+#include <string>    // for char_traits, string, to_string
+#include <utility>   // for pair, make_pair, swap
+#include <vector>    // for vector
+
+namespace d09 {
+
 
 using NumBlocks = unsigned long long;
 
@@ -224,22 +227,22 @@ NumBlocks get_part_2_checksum(const DefragMap &defrag_map) {
   return checksum;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(9);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
 
-  const auto defrag_map = get_defrag_map_from_file(argv[1]);
+  
+std::string part_1(const std::string &filepath) {
+  const auto defrag_map = get_defrag_map_from_file(filepath);
 
   NumBlocks accumulator = get_part_1_checksum(defrag_map);
 
-  std::cout << "Part 1: Checksum: " << accumulator << std::endl;
-
-  accumulator = get_part_2_checksum(defrag_map);
-
-  std::cout << "Part 2: Checksum: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+  
+std::string part_2(const std::string &filepath) {
+  const auto defrag_map = get_defrag_map_from_file(filepath);
+
+  NumBlocks accumulator = get_part_2_checksum(defrag_map);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d09

@@ -1,11 +1,13 @@
-#include <array>        // for array
-#include <core_lib.hpp> // for get_lines_from_file
-#include <deque>        // for deque
-#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
-#include <set>          // for set
-#include <string>       // for char_traits, basic_string, string
-#include <utility>      // for pair
-#include <vector>       // for vector
+#include <d10.hpp>
+#include <array>         // for array
+#include <core_lib.hpp>  // for Position, Tile, get_lines_from_file, Coordinate
+#include <deque>         // for deque
+#include <set>           // for set
+#include <string>        // for basic_string, string, to_string
+#include <utility>       // for pair
+#include <vector>        // for vector
+
+namespace d10 {
 
 using ElevationMap = Grid;
 
@@ -98,22 +100,22 @@ int count_unique_trails(const ElevationMap &elev_map) {
   return accumulator;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(10);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const ElevationMap elev_map = get_lines_from_file(argv[1]);
+  const ElevationMap elev_map = get_lines_from_file(filepath);
 
   int accumulator = count_unique_trailheads(elev_map);
 
-  std::cout << "Part 1: Sum: " << accumulator << std::endl;
-
-  accumulator = count_unique_trails(elev_map);
-
-  std::cout << "Part 2: Sum: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+
+  const ElevationMap elev_map = get_lines_from_file(filepath);
+
+
+  int accumulator = count_unique_trails(elev_map);
+  return std::to_string(accumulator);
+}
+
+} // namespace d10

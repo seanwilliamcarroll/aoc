@@ -37,6 +37,41 @@ add_link_options(-fsanitize=address)
 set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options})
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 
+
+function(make_my_day)
+  project(d${ARGV0} VERSION 0.1.0)
+
+  add_library(d${ARGV0}-lib d${ARGV0}.cpp)
+
+  target_include_directories(d${ARGV0}-lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}) 
+
+  target_link_libraries(d${ARGV0}-lib core)
+
+  set_target_properties(d${ARGV0}-lib
+    PROPERTIES
+    OUTPUT_NAME d${ARGV0}-lib
+    CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options}
+  )
+
+  add_executable(d${ARGV0}-exe ${CMAKE_SOURCE_DIR}/main/main.cpp)
+
+  set(AOC_DAY_ID d${ARGV0})
+
+  target_compile_definitions(d${ARGV0}-exe PUBLIC
+    AOC_DAY_ID=${AOC_DAY_ID}
+    AOC_DAY_FILE="${AOC_DAY_ID}.hpp"
+  )
+
+  set_target_properties(d${ARGV0}-exe
+    PROPERTIES
+    OUTPUT_NAME d${ARGV0}
+    CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options}
+  )
+
+  target_link_libraries(d${ARGV0}-exe d${ARGV0}-lib)
+  
+endfunction()
+
 add_subdirectory(core)
 
 add_subdirectory(d01)

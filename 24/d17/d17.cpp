@@ -1,3 +1,4 @@
+#include <d17.hpp>
 #include <algorithm>    // for min_element
 #include <array>        // for array
 #include <core_lib.hpp> // for do_assert, greet_day
@@ -10,7 +11,9 @@
 #include <string>       // for char_traits, string, allocator, operator+
 #include <vector>       // for vector
 
-using Value = long long;
+namespace d17 {
+
+using Value = int64_t;
 
 using Register = Value;
 
@@ -45,12 +48,15 @@ struct c_ProgramState {
 
   Values m_Output;
 
+  c_ProgramState() : m_A{}, m_B{}, m_C{}, m_ProgramCounter{}, m_Instructions{}, m_Output{} {}
+  
   Value combo_operand(const Value operand) const;
 
   size_t simulate_instruction(const Instruction instruction,
                               const Value operand);
 
   void simulate();
+
 };
 
 void print_instructions(const Instructions &instructions) {
@@ -79,13 +85,13 @@ Value c_ProgramState::combo_operand(const Value operand) const {
     return operand;
   }
   if (operand == 4) {
-    return m_A;
+    return this->m_A;
   }
   if (operand == 5) {
-    return m_B;
+    return this->m_B;
   }
   if (operand == 6) {
-    return m_C;
+    return this->m_C;
   }
   throw std::runtime_error(std::string("Invalid combo operand: ") +
                            std::to_string(operand));
@@ -95,38 +101,38 @@ size_t c_ProgramState::simulate_instruction(const Instruction instruction,
                                             const Value operand) {
   switch (instruction) {
   case ADV: {
-    m_A = m_A / (1LL << combo_operand(operand));
+    this->m_A = this->m_A / (1LL << combo_operand(operand));
     break;
   };
   case BXL: {
-    m_B = m_B ^ operand;
+    this->m_B = this->m_B ^ operand;
     break;
   };
   case BST: {
-    m_B = combo_operand(operand) % 8;
+    this->m_B = combo_operand(operand) % 8;
     break;
   };
   case JNZ: {
-    if (m_A != 0) {
-      m_ProgramCounter = operand;
+    if (this->m_A != 0LL) {
+      this->m_ProgramCounter = operand;
       return 0;
     }
     break;
   };
   case BXC: {
-    m_B = m_B ^ m_C;
+    this->m_B = this->m_B ^ this->m_C;
     break;
   };
   case OUT: {
-    m_Output.push_back(combo_operand(operand) % 8);
+    this->m_Output.push_back(combo_operand(operand) % 8);
     break;
   };
   case BDV: {
-    m_B = m_A / (1LL << combo_operand(operand));
+    this->m_B = this->m_A / (1LL << combo_operand(operand));
     break;
   };
   case CDV: {
-    m_C = m_A / (1LL << combo_operand(operand));
+    this->m_C = this->m_A / (1LL << combo_operand(operand));
     break;
   };
   default: {
@@ -140,11 +146,12 @@ size_t c_ProgramState::simulate_instruction(const Instruction instruction,
 }
 
 void c_ProgramState::simulate() {
-  while (m_ProgramCounter < m_Instructions.size() - 1) {
-    Instruction current_instruction = m_Instructions[m_ProgramCounter];
-    Value operand = m_Instructions[m_ProgramCounter + 1];
+  this->m_ProgramCounter = 0;
+  while (this->m_ProgramCounter < this->m_Instructions.size() - 1) {
+    Instruction current_instruction = this->m_Instructions[this->m_ProgramCounter];
+    Value operand = this->m_Instructions[this->m_ProgramCounter + 1];
     size_t next_offset = simulate_instruction(current_instruction, operand);
-    m_ProgramCounter += next_offset;
+    this->m_ProgramCounter += next_offset;
   }
 }
 
@@ -283,7 +290,7 @@ Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
     // Get next value to try
     Value A_reg = next_to_try.front();
     next_to_try.pop_front();
-
+    
     // Try it
     c_ProgramState program_state(input_program_state);
     program_state.m_A = A_reg;
@@ -294,8 +301,8 @@ Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
         program_state.m_Output, input_program_state.m_Instructions);
     if (num_matches == input_program_state.m_Instructions.size()) {
       output.push_back(A_reg);
-    } else if (num_matches == program_state.m_Output.size()) {
-      add_new_values_to_try(A_reg * 8, next_to_try);
+    } else if (num_matches > 0 && num_matches == program_state.m_Output.size()) {
+      add_new_values_to_try(A_reg * 8LL, next_to_try);
     }
   }
 
@@ -304,23 +311,20 @@ Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
   return *std::min_element(output.begin(), output.end());
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(17);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
-
-  const auto program_state = get_program_state_from_file(argv[1]);
+std::string part_1(const std::string &filepath) {
+  const auto program_state = get_program_state_from_file(filepath);
 
   const auto output_program_state = simulate_program(program_state);
 
-  std::cout << "Part 1: " << sequence_to_string(output_program_state.m_Output)
-            << std::endl;
+  return sequence_to_string(output_program_state.m_Output);
+}
+
+std::string part_2(const std::string &filepath) {
+  const auto program_state = get_program_state_from_file(filepath);
 
   Value accumulator = find_lowest_value_for_quine(program_state);
 
-  std::cout << "Part 2: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+} // namespace d17

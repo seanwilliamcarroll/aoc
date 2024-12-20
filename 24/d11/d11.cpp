@@ -1,13 +1,13 @@
-#include <cmath> // for floor, log10, pow
-#include <core_lib.hpp>
-#include <fstream>  // for basic_ostream, endl, operator<<, basic_istream
-#include <iostream> // for cout, cerr
-#include <map>      // for __map_const_iterator, map
-#include <stddef.h> // for size_t
-#include <string>   // for char_traits, string
-#include <utility>  // for make_pair, pair
-#include <vector>   // for vector
+#include <d11.hpp>
+#include <stddef.h>  // for size_t
+#include <cmath>     // for floor, log10, pow
+#include <fstream>   // for basic_istream, basic_ifstream, ifstream
+#include <map>       // for __map_const_iterator, map
+#include <string>    // for string, to_string
+#include <utility>   // for make_pair, pair
+#include <vector>    // for vector
 
+namespace d11 {
 using Stone = long long;
 using Stones = std::vector<Stone>;
 
@@ -79,24 +79,26 @@ UniqueStoneCounts create_counts(const Stones &stones) {
   return counts;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(11);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const auto stones = get_stones_from_file(argv[1]);
+  const auto stones = get_stones_from_file(filepath);
 
   UniqueStoneCounts counts = create_counts(stones);
 
   counts = do_n_blinks(counts, 25);
-  std::cout << "Part 1: After 25 blinks: " << get_total_count(counts)
-            << std::endl;
 
-  counts = do_n_blinks(counts, 50);
-  std::cout << "Part 2: After 75 blinks: " << get_total_count(counts)
-            << std::endl;
-
-  return 0;
+  return std::to_string(get_total_count(counts));
 }
+
+std::string part_2(const std::string &filepath) {
+
+  const auto stones = get_stones_from_file(filepath);
+
+  UniqueStoneCounts counts = create_counts(stones);
+
+  counts = do_n_blinks(counts, 75);
+
+  return std::to_string(get_total_count(counts));
+}
+
+} // namespace d11

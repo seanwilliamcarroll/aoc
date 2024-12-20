@@ -13,6 +13,23 @@ set_target_properties(all_tests-exe
 
 target_link_libraries(all_tests-exe
   d01-lib
+  d02-lib
+  d03-lib
+  d04-lib
+  d05-lib
+  d06-lib
+  d07-lib
+  d08-lib
+  d09-lib
+  d10-lib
+  d11-lib
+  d12-lib
+  d13-lib
+  d14-lib
+  d15-lib
+  d16-lib
+  d17-lib
+  d18-lib
   GTest::gtest_main
 )
 

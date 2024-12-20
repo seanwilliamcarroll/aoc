@@ -1,3 +1,4 @@
+#include <d13.hpp>
 #include <algorithm> // for min_element
 #include <cmath>     // for llround
 #include <core_lib.hpp>
@@ -8,6 +9,9 @@
 #include <string>    // for char_traits, stoll, string
 #include <utility>   // for make_pair, pair
 #include <vector>    // for vector
+
+namespace d13 {
+
 
 using Increment = Position;
 
@@ -207,24 +211,24 @@ Equations convert_equations_part_2(const Equations &equations) {
   return new_equations;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(13);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
-
-  const auto equations = get_equations_from_file(argv[1]);
+  
+std::string part_1(const std::string &filepath) {
+  const auto equations = get_equations_from_file(filepath);
 
   Tokens accumulator = get_total_minimized_cost(equations);
 
-  std::cout << "Part 1: Cost:  " << accumulator << std::endl;
+  return std::to_string(accumulator);
+}
+
+std::string part_2(const std::string &filepath) {
+
+  const auto equations = get_equations_from_file(filepath);
 
   const auto new_equations = convert_equations_part_2(equations);
 
-  accumulator = get_total_minimized_cost(new_equations);
+  Tokens accumulator = get_total_minimized_cost(new_equations);
 
-  std::cout << "Part 2: Cost:  " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+} // namespace d13

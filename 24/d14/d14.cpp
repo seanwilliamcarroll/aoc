@@ -1,3 +1,4 @@
+#include <d14.hpp>
 #include <core_lib.hpp>
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>  // for cout, cerr
@@ -6,6 +7,8 @@
 #include <string>    // for char_traits, stoll, string
 #include <utility>   // for make_pair, pair
 #include <vector>    // for vector
+
+namespace d14 {
 
 using Velocity = Position;
 
@@ -189,22 +192,22 @@ int find_easter_egg(const Robots &input_robots) {
   return second;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(14);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const auto robots = get_robots_from_file(argv[1]);
+  const auto robots = get_robots_from_file(filepath);
 
   int accumulator = calculate_safety_after_n_seconds(100, robots);
 
-  std::cout << "Part 1: Safety score: " << accumulator << std::endl;
-
-  accumulator = find_easter_egg(robots);
-
-  std::cout << "Part 2: Num seconds: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+  const auto robots = get_robots_from_file(filepath);
+
+  int accumulator = find_easter_egg(robots);
+
+  return std::to_string(accumulator);
+
+}
+
+} // namespace d14

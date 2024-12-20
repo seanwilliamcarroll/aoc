@@ -1,14 +1,17 @@
-#include <array>        // for array
-#include <core_lib.hpp> // for Coordinate, Tile, Grid, Position, get_lines_...
-#include <deque>        // for deque
-#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
-#include <limits>       // for numeric_limits
-#include <set>          // for set, operator!=, __tree_const_iterator
-#include <stdexcept>    // for runtime_error
-#include <string>       // for char_traits, basic_string
-#include <tuple>        // for get, tuple, make_tuple, operator==
-#include <utility>      // for pair, make_pair
-#include <vector>       // for vector
+#include <d16.hpp>
+#include <array>         // for array
+#include <core_lib.hpp>  // for Coordinate, get_lines_from_file, Tile, Grid
+#include <deque>         // for deque
+#include <limits>        // for numeric_limits
+#include <set>           // for set, operator!=, __tree_const_iterator
+#include <stdexcept>     // for runtime_error
+#include <string>        // for basic_string, string, to_string
+#include <tuple>         // for get, tuple, make_tuple, operator==
+#include <utility>       // for pair, make_pair
+#include <vector>        // for vector
+
+namespace d16 {
+
 
 constexpr Tile START = 'S';
 constexpr Tile WALL = '#';
@@ -153,20 +156,23 @@ std::pair<Score, Score> find_shortest_path(const Grid &grid) {
   return std::make_pair(lowest_score, best_seats.size());
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(16);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+  
+std::string part_1(const std::string &filepath) {
 
-  const auto grid = get_lines_from_file(argv[1]);
+  const auto grid = get_lines_from_file(filepath);
 
-  const auto [part_1, part_2] = find_shortest_path(grid);
+  const auto [part_1, _] = find_shortest_path(grid);
 
-  std::cout << "Part 1: Score: " << part_1 << std::endl;
-
-  std::cout << "Part 2: Score: " << part_2 << std::endl;
-
-  return 0;
+  return std::to_string(part_1);
 }
+
+std::string part_2(const std::string &filepath) { 
+  const auto grid = get_lines_from_file(filepath);
+
+  const auto [_, part_2] = find_shortest_path(grid);
+
+  return std::to_string(part_2);
+}
+
+
+} // namespace d16

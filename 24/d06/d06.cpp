@@ -1,11 +1,13 @@
-#include <array>        // for array
-#include <core_lib.hpp> // for Grid, Position, Tile, is_in_bounds, get_line...
-#include <iostream>     // for basic_ostream, endl, operator<<, cout, cerr
-#include <set>          // for set, __tree_const_iterator
-#include <stddef.h>     // for size_t
-#include <stdexcept>    // for runtime_error
-#include <string>       // for char_traits, basic_string
-#include <utility>      // for pair, make_pair
+#include <d06.hpp>
+#include <stddef.h>      // for size_t
+#include <array>         // for array
+#include <core_lib.hpp>  // for Grid, Position, Tile, get_lines_from_file
+#include <set>           // for set, __tree_const_iterator
+#include <stdexcept>     // for runtime_error
+#include <string>        // for basic_string, string, to_string
+#include <utility>       // for pair, make_pair, operator==
+
+namespace d06 {
 
 using PositionSet = std::set<Position>;
 
@@ -121,24 +123,25 @@ size_t count_new_obstacle_candidates(const Grid &original_grid,
   return new_obstacle_candidates;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(6);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
-
-  const Grid grid = get_lines_from_file(argv[1]);
+std::string part_1(const std::string &filepath) {
+  const Grid grid = get_lines_from_file(filepath);
 
   const auto visited_positions = simulate_guard_get_visited_positions(grid);
   auto accumulator = visited_positions.size();
 
-  std::cout << "Part 1: Num Tiles Visited " << accumulator << std::endl;
+  return std::to_string(accumulator);
 
-  accumulator = count_new_obstacle_candidates(grid, visited_positions);
-
-  std::cout << "Part 2: Num New Obstacle Candidates " << accumulator
-            << std::endl;
-
-  return 0;
 }
+
+std::string part_2(const std::string &filepath) {
+  const Grid grid = get_lines_from_file(filepath);
+
+  const auto visited_positions = simulate_guard_get_visited_positions(grid);
+
+  auto accumulator = count_new_obstacle_candidates(grid, visited_positions);
+
+  return std::to_string(accumulator);
+
+}
+
+} // namespace d06

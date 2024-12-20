@@ -1,15 +1,14 @@
 #include <core_lib.hpp>
 #include <fstream>   // for basic_ostream, endl, operator<<, basic_istream
-#include <iomanip>   // for operator<<, setfill, setw
 #include <iostream>  // for cout
 #include <stdexcept> // for runtime_error
 
-void greet_day(const int day_number) {
+void greet_day(const char *day_number) {
   std::cout << "==============================================================="
                "================="
             << std::endl;
-  std::cout << "Day " << std::setfill('0') << std::setw(2) << day_number
-            << std::endl;
+  // Hack to skip over the "d"
+  std::cout << "Day " << (day_number + 1) << std::endl;
   std::cout << "==============================================================="
                "================="
             << std::endl;

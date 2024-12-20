@@ -15,7 +15,7 @@ using Grid = std::vector<std::string>;
 template <typename EntryType>
 using Matrix2D = std::vector<std::vector<EntryType>>;
 
-void greet_day(int);
+void greet_day(const char *);
 
 Grid get_lines_from_file(const std::string &filepath);
 

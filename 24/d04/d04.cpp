@@ -1,11 +1,13 @@
-#include <algorithm>        // for reverse
-#include <core_lib.hpp>     // for get_lines_from_file
-#include <initializer_list> // for initializer_list
-#include <iostream>         // for basic_ostream, endl, operator<<, cout, cerr
-#include <stddef.h>         // for size_t
-#include <string>           // for basic_string, string, char_traits, swap
-#include <utility>          // for pair
-#include <vector>           // for vector
+#include <d04.hpp>
+#include <stddef.h>          // for size_t
+#include <algorithm>         // for reverse
+#include <core_lib.hpp>      // for Grid, get_lines_from_file
+#include <initializer_list>  // for initializer_list
+#include <string>            // for basic_string, string, to_string, swap
+#include <utility>           // for pair
+#include <vector>            // for vector
+
+namespace d04 {
 
 int count_xmas_samx(const Grid &lines) {
   int accumulator = 0;
@@ -171,22 +173,20 @@ int count_all_xmas_part_1(const Grid &lines) {
   return accumulator;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(4);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
-
-  const auto lines = get_lines_from_file(argv[1]);
+std::string part_1(const std::string &filepath) {
+  const auto lines = get_lines_from_file(filepath);
 
   int accumulator = count_all_xmas_part_1(lines);
 
-  std::cout << "Part 1: Total: " << accumulator << std::endl;
-
-  accumulator = count_x_shaped_mas(lines);
-
-  std::cout << "Part 2: Total: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+  const auto lines = get_lines_from_file(filepath);
+
+  int accumulator = count_x_shaped_mas(lines);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d04

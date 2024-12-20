@@ -1,13 +1,15 @@
-#include <_ctype.h>      // for isalnum
-#include <cctype>        // for isalnum
-#include <core_lib.hpp>  // for get_lines_from_file
-#include <iostream>      // for basic_ostream, endl, operator<<, cout, cerr
-#include <set>           // for set
-#include <stddef.h>      // for size_t
-#include <string>        // for char_traits, basic_string, string
-#include <unordered_map> // for __hash_map_iterator, operator==, unordered_map
-#include <utility>       // for make_pair, pair
-#include <vector>        // for vector
+#include <d08.hpp>
+#include <_ctype.h>       // for isalnum
+#include <stddef.h>       // for size_t
+#include <cctype>         // for isalnum
+#include <core_lib.hpp>   // for Position, Coordinate, get_lines_from_file
+#include <set>            // for set
+#include <string>         // for string, to_string, basic_string
+#include <unordered_map>  // for __hash_map_iterator, operator==, unordered_map
+#include <utility>        // for make_pair, pair
+#include <vector>         // for vector
+
+namespace d08 {
 
 using AntennaMap = Grid;
 
@@ -108,26 +110,26 @@ int count_unique_antinode_positions(const AntennaMap &antenna_map,
   return unique_positions.size();
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(8);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  const AntennaMap antenna_map = get_lines_from_file(argv[1]);
+  const AntennaMap antenna_map = get_lines_from_file(filepath);
 
   bool is_part_2 = false;
 
   int accumulator = count_unique_antinode_positions(antenna_map, is_part_2);
 
-  std::cout << "Part 1: Total antinodes: " << accumulator << std::endl;
-
-  is_part_2 = true;
-
-  accumulator = count_unique_antinode_positions(antenna_map, is_part_2);
-
-  std::cout << "Part 2: Total antinodes: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) {
+
+  const AntennaMap antenna_map = get_lines_from_file(filepath);
+
+  bool is_part_2 = true;
+
+  int accumulator = count_unique_antinode_positions(antenna_map, is_part_2);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d08

@@ -1,11 +1,12 @@
-#include <_ctype.h> // for isdigit
-#include <cctype>   // for isdigit
-#include <core_lib.hpp>
-#include <cstddef>  // for size_t
-#include <fstream>  // for basic_ostream, endl, operator<<, basic_ifstream
-#include <iostream> // for cout, cerr
-#include <sstream>  // for basic_stringstream, stringstream
-#include <string>   // for char_traits, allocator, string, stoi
+#include <d03.hpp>
+#include <_ctype.h>  // for isdigit
+#include <cctype>    // for isdigit
+#include <cstddef>   // for size_t
+#include <fstream>   // for basic_ifstream, basic_filebuf, basic_ostream
+#include <sstream>   // for basic_stringstream, stringstream
+#include <string>    // for string, char_traits, allocator, stoi, to_string
+
+namespace d03 {
 
 std::stringstream get_content_from_file(const std::string &filepath) {
   std::ifstream in_stream(filepath);
@@ -107,22 +108,21 @@ int calculate_muls(const std::string &input, bool enable_do = false) {
   return output;
 }
 
-int main(int argc, char *argv[]) {
-  greet_day(3);
-  if (argc <= 1) {
-    std::cerr << "Must provide filepath!" << std::endl;
-    return -1;
-  }
+std::string part_1(const std::string &filepath) {
 
-  auto file_stream = get_content_from_file(argv[1]);
+  auto file_stream = get_content_from_file(filepath);
 
   int accumulator = calculate_muls(file_stream.str());
 
-  std::cout << "Part 1: Sum: " << accumulator << std::endl;
-
-  accumulator = calculate_muls(file_stream.str(), true);
-
-  std::cout << "Part 2: Sum: " << accumulator << std::endl;
-
-  return 0;
+  return std::to_string(accumulator);
 }
+
+std::string part_2(const std::string &filepath) { 
+  auto file_stream = get_content_from_file(filepath);
+
+  int accumulator = calculate_muls(file_stream.str(), true);
+
+  return std::to_string(accumulator);
+}
+
+} // namespace d03
