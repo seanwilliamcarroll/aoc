@@ -1,14 +1,13 @@
 #include <d09.hpp>
-#include <stddef.h>  // for size_t
-#include <deque>     // for deque, __deque_iterator
-#include <fstream>   // for basic_istream, basic_ostream, endl, operator<<
-#include <iostream>  // for cout
-#include <string>    // for char_traits, string, to_string
-#include <utility>   // for pair, make_pair, swap
-#include <vector>    // for vector
+#include <deque>    // for deque, __deque_iterator
+#include <fstream>  // for basic_istream, basic_ostream, endl, operator<<
+#include <iostream> // for cout
+#include <stddef.h> // for size_t
+#include <string>   // for char_traits, string, to_string
+#include <utility>  // for pair, make_pair, swap
+#include <vector>   // for vector
 
 namespace d09 {
-
 
 using NumBlocks = unsigned long long;
 
@@ -227,8 +226,6 @@ NumBlocks get_part_2_checksum(const DefragMap &defrag_map) {
   return checksum;
 }
 
-
-  
 std::string part_1(const std::string &filepath) {
   const auto defrag_map = get_defrag_map_from_file(filepath);
 
@@ -236,7 +233,7 @@ std::string part_1(const std::string &filepath) {
 
   return std::to_string(accumulator);
 }
-  
+
 std::string part_2(const std::string &filepath) {
   const auto defrag_map = get_defrag_map_from_file(filepath);
 

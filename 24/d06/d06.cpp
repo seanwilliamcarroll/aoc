@@ -1,11 +1,11 @@
+#include <array>        // for array
+#include <core_lib.hpp> // for Grid, Position, Tile, get_lines_from_file
 #include <d06.hpp>
-#include <stddef.h>      // for size_t
-#include <array>         // for array
-#include <core_lib.hpp>  // for Grid, Position, Tile, get_lines_from_file
-#include <set>           // for set, __tree_const_iterator
-#include <stdexcept>     // for runtime_error
-#include <string>        // for basic_string, string, to_string
-#include <utility>       // for pair, make_pair, operator==
+#include <set>       // for set, __tree_const_iterator
+#include <stddef.h>  // for size_t
+#include <stdexcept> // for runtime_error
+#include <string>    // for basic_string, string, to_string
+#include <utility>   // for pair, make_pair, operator==
 
 namespace d06 {
 
@@ -130,7 +130,6 @@ std::string part_1(const std::string &filepath) {
   auto accumulator = visited_positions.size();
 
   return std::to_string(accumulator);
-
 }
 
 std::string part_2(const std::string &filepath) {
@@ -141,7 +140,6 @@ std::string part_2(const std::string &filepath) {
   auto accumulator = count_new_obstacle_candidates(grid, visited_positions);
 
   return std::to_string(accumulator);
-
 }
 
 } // namespace d06

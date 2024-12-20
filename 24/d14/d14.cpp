@@ -1,5 +1,5 @@
-#include <d14.hpp>
 #include <core_lib.hpp>
+#include <d14.hpp>
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>  // for cout, cerr
 #include <stddef.h>  // for size_t
@@ -207,7 +207,6 @@ std::string part_2(const std::string &filepath) {
   int accumulator = find_easter_egg(robots);
 
   return std::to_string(accumulator);
-
 }
 
 } // namespace d14

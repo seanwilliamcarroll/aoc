@@ -1,7 +1,7 @@
-#include <d13.hpp>
 #include <algorithm> // for min_element
 #include <cmath>     // for llround
 #include <core_lib.hpp>
+#include <d13.hpp>
 #include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
 #include <iostream>  // for cout, cerr
 #include <stddef.h>  // for size_t
@@ -11,7 +11,6 @@
 #include <vector>    // for vector
 
 namespace d13 {
-
 
 using Increment = Position;
 
@@ -211,7 +210,6 @@ Equations convert_equations_part_2(const Equations &equations) {
   return new_equations;
 }
 
-  
 std::string part_1(const std::string &filepath) {
   const auto equations = get_equations_from_file(filepath);
 

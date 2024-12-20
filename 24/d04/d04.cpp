@@ -1,11 +1,11 @@
+#include <algorithm>    // for reverse
+#include <core_lib.hpp> // for Grid, get_lines_from_file
 #include <d04.hpp>
-#include <stddef.h>          // for size_t
-#include <algorithm>         // for reverse
-#include <core_lib.hpp>      // for Grid, get_lines_from_file
-#include <initializer_list>  // for initializer_list
-#include <string>            // for basic_string, string, to_string, swap
-#include <utility>           // for pair
-#include <vector>            // for vector
+#include <initializer_list> // for initializer_list
+#include <stddef.h>         // for size_t
+#include <string>           // for basic_string, string, to_string, swap
+#include <utility>          // for pair
+#include <vector>           // for vector
 
 namespace d04 {
 

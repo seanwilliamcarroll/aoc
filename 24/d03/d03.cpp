@@ -1,10 +1,10 @@
+#include <_ctype.h> // for isdigit
+#include <cctype>   // for isdigit
+#include <cstddef>  // for size_t
 #include <d03.hpp>
-#include <_ctype.h>  // for isdigit
-#include <cctype>    // for isdigit
-#include <cstddef>   // for size_t
-#include <fstream>   // for basic_ifstream, basic_filebuf, basic_ostream
-#include <sstream>   // for basic_stringstream, stringstream
-#include <string>    // for string, char_traits, allocator, stoi, to_string
+#include <fstream> // for basic_ifstream, basic_filebuf, basic_ostream
+#include <sstream> // for basic_stringstream, stringstream
+#include <string>  // for string, char_traits, allocator, stoi, to_string
 
 namespace d03 {
 
@@ -117,7 +117,7 @@ std::string part_1(const std::string &filepath) {
   return std::to_string(accumulator);
 }
 
-std::string part_2(const std::string &filepath) { 
+std::string part_2(const std::string &filepath) {
   auto file_stream = get_content_from_file(filepath);
 
   int accumulator = calculate_muls(file_stream.str(), true);

@@ -1,12 +1,12 @@
+#include <cmath> // for floor, log10, pow
 #include <d07.hpp>
-#include <stddef.h>  // for size_t
-#include <cmath>     // for floor, log10, pow
-#include <deque>     // for deque, __deque_iterator
-#include <fstream>   // for basic_ostream, operator<<, basic_istream, endl
-#include <iostream>  // for cout
-#include <string>    // for char_traits, string, stoull, to_string
-#include <utility>   // for pair, make_pair
-#include <vector>    // for vector
+#include <deque>    // for deque, __deque_iterator
+#include <fstream>  // for basic_ostream, operator<<, basic_istream, endl
+#include <iostream> // for cout
+#include <stddef.h> // for size_t
+#include <string>   // for char_traits, string, stoull, to_string
+#include <utility>  // for pair, make_pair
+#include <vector>   // for vector
 
 namespace d07 {
 

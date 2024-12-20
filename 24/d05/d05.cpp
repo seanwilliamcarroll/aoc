@@ -1,16 +1,16 @@
+#include <__hash_table> // for __hash_const_iterator
+#include <_ctype.h>     // for isdigit
+#include <cctype>       // for isdigit
 #include <d05.hpp>
-#include <_ctype.h>       // for isdigit
-#include <stddef.h>       // for size_t
-#include <__hash_table>   // for __hash_const_iterator
-#include <cctype>         // for isdigit
-#include <fstream>        // for basic_istream, basic_ifstream, getline, bas...
-#include <iostream>       // for cout
-#include <stdexcept>      // for runtime_error
-#include <string>         // for char_traits, string, stoi, to_string
-#include <unordered_map>  // for operator==, __hash_map_const_iterator, __ha...
-#include <unordered_set>  // for unordered_set
-#include <utility>        // for make_pair, pair
-#include <vector>         // for vector
+#include <fstream>       // for basic_istream, basic_ifstream, getline, bas...
+#include <iostream>      // for cout
+#include <stddef.h>      // for size_t
+#include <stdexcept>     // for runtime_error
+#include <string>        // for char_traits, string, stoi, to_string
+#include <unordered_map> // for operator==, __hash_map_const_iterator, __ha...
+#include <unordered_set> // for unordered_set
+#include <utility>       // for make_pair, pair
+#include <vector>        // for vector
 
 namespace d05 {
 

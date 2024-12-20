@@ -1,13 +1,13 @@
+#include <_ctype.h>     // for isalnum
+#include <cctype>       // for isalnum
+#include <core_lib.hpp> // for Position, Coordinate, get_lines_from_file
 #include <d08.hpp>
-#include <_ctype.h>       // for isalnum
-#include <stddef.h>       // for size_t
-#include <cctype>         // for isalnum
-#include <core_lib.hpp>   // for Position, Coordinate, get_lines_from_file
-#include <set>            // for set
-#include <string>         // for string, to_string, basic_string
-#include <unordered_map>  // for __hash_map_iterator, operator==, unordered_map
-#include <utility>        // for make_pair, pair
-#include <vector>         // for vector
+#include <set>           // for set
+#include <stddef.h>      // for size_t
+#include <string>        // for string, to_string, basic_string
+#include <unordered_map> // for __hash_map_iterator, operator==, unordered_map
+#include <utility>       // for make_pair, pair
+#include <vector>        // for vector
 
 namespace d08 {
 

@@ -1,10 +1,10 @@
+#include <_stdlib.h> // for abs
+#include <cmath>     // for abs
+#include <cstdlib>   // for size_t
 #include <d02.hpp>
-#include <_stdlib.h>  // for abs
-#include <cmath>      // for abs
-#include <cstdlib>    // for size_t
-#include <fstream>    // for basic_istream, basic_ifstream, getline, ifstream
-#include <string>     // for char_traits, string, stoi, to_string
-#include <vector>     // for vector
+#include <fstream> // for basic_istream, basic_ifstream, getline, ifstream
+#include <string>  // for char_traits, string, stoi, to_string
+#include <vector>  // for vector
 
 namespace d02 {
 std::vector<std::vector<int>> get_lists_from_file(const std::string &filepath) {

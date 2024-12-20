@@ -1,15 +1,15 @@
-#include <d17.hpp>
 #include <algorithm>    // for min_element
 #include <array>        // for array
 #include <core_lib.hpp> // for do_assert, greet_day
-#include <deque>        // for deque
-#include <fstream>      // for basic_ostream, operator<<, endl, basic_istream
-#include <iostream>     // for cout, cerr
-#include <sstream>      // for basic_stringstream, stringstream
-#include <stddef.h>     // for size_t
-#include <stdexcept>    // for runtime_error
-#include <string>       // for char_traits, string, allocator, operator+
-#include <vector>       // for vector
+#include <d17.hpp>
+#include <deque>     // for deque
+#include <fstream>   // for basic_ostream, operator<<, endl, basic_istream
+#include <iostream>  // for cout, cerr
+#include <sstream>   // for basic_stringstream, stringstream
+#include <stddef.h>  // for size_t
+#include <stdexcept> // for runtime_error
+#include <string>    // for char_traits, string, allocator, operator+
+#include <vector>    // for vector
 
 namespace d17 {
 
@@ -48,15 +48,20 @@ struct c_ProgramState {
 
   Values m_Output;
 
-  c_ProgramState() : m_A{}, m_B{}, m_C{}, m_ProgramCounter{}, m_Instructions{}, m_Output{} {}
-  
+  c_ProgramState()
+      : m_A{}
+      , m_B{}
+      , m_C{}
+      , m_ProgramCounter{}
+      , m_Instructions{}
+      , m_Output{} {}
+
   Value combo_operand(const Value operand) const;
 
   size_t simulate_instruction(const Instruction instruction,
                               const Value operand);
 
   void simulate();
-
 };
 
 void print_instructions(const Instructions &instructions) {
@@ -148,7 +153,8 @@ size_t c_ProgramState::simulate_instruction(const Instruction instruction,
 void c_ProgramState::simulate() {
   this->m_ProgramCounter = 0;
   while (this->m_ProgramCounter < this->m_Instructions.size() - 1) {
-    Instruction current_instruction = this->m_Instructions[this->m_ProgramCounter];
+    Instruction current_instruction =
+        this->m_Instructions[this->m_ProgramCounter];
     Value operand = this->m_Instructions[this->m_ProgramCounter + 1];
     size_t next_offset = simulate_instruction(current_instruction, operand);
     this->m_ProgramCounter += next_offset;
@@ -290,7 +296,7 @@ Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
     // Get next value to try
     Value A_reg = next_to_try.front();
     next_to_try.pop_front();
-    
+
     // Try it
     c_ProgramState program_state(input_program_state);
     program_state.m_A = A_reg;
@@ -301,7 +307,8 @@ Value find_lowest_value_for_quine(const c_ProgramState &input_program_state) {
         program_state.m_Output, input_program_state.m_Instructions);
     if (num_matches == input_program_state.m_Instructions.size()) {
       output.push_back(A_reg);
-    } else if (num_matches > 0 && num_matches == program_state.m_Output.size()) {
+    } else if (num_matches > 0 &&
+               num_matches == program_state.m_Output.size()) {
       add_new_values_to_try(A_reg * 8LL, next_to_try);
     }
   }

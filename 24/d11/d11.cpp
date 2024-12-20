@@ -1,11 +1,11 @@
+#include <cmath> // for floor, log10, pow
 #include <d11.hpp>
-#include <stddef.h>  // for size_t
-#include <cmath>     // for floor, log10, pow
-#include <fstream>   // for basic_istream, basic_ifstream, ifstream
-#include <map>       // for __map_const_iterator, map
-#include <string>    // for string, to_string
-#include <utility>   // for make_pair, pair
-#include <vector>    // for vector
+#include <fstream>  // for basic_istream, basic_ifstream, ifstream
+#include <map>      // for __map_const_iterator, map
+#include <stddef.h> // for size_t
+#include <string>   // for string, to_string
+#include <utility>  // for make_pair, pair
+#include <vector>   // for vector
 
 namespace d11 {
 using Stone = long long;

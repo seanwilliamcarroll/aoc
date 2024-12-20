@@ -1,11 +1,11 @@
+#include <array>        // for array
+#include <core_lib.hpp> // for Position, Tile, get_lines_from_file, Coordinate
 #include <d10.hpp>
-#include <array>         // for array
-#include <core_lib.hpp>  // for Position, Tile, get_lines_from_file, Coordinate
-#include <deque>         // for deque
-#include <set>           // for set
-#include <string>        // for basic_string, string, to_string
-#include <utility>       // for pair
-#include <vector>        // for vector
+#include <deque>   // for deque
+#include <set>     // for set
+#include <string>  // for basic_string, string, to_string
+#include <utility> // for pair
+#include <vector>  // for vector
 
 namespace d10 {
 
@@ -112,7 +112,6 @@ std::string part_1(const std::string &filepath) {
 std::string part_2(const std::string &filepath) {
 
   const ElevationMap elev_map = get_lines_from_file(filepath);
-
 
   int accumulator = count_unique_trails(elev_map);
   return std::to_string(accumulator);

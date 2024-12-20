@@ -1,14 +1,14 @@
+#include <algorithm>    // for sort
+#include <array>        // for array
+#include <core_lib.hpp> // for Position, Coordinate, get_lines_from_file
 #include <d12.hpp>
-#include <stddef.h>      // for size_t
-#include <algorithm>     // for sort
-#include <array>         // for array
-#include <core_lib.hpp>  // for Position, Coordinate, get_lines_from_file
-#include <deque>         // for deque
-#include <map>           // for map, __map_iterator
-#include <set>           // for set, __tree_const_iterator
-#include <string>        // for basic_string, string, to_string
-#include <utility>       // for pair, make_pair
-#include <vector>        // for vector
+#include <deque>    // for deque
+#include <map>      // for map, __map_iterator
+#include <set>      // for set, __tree_const_iterator
+#include <stddef.h> // for size_t
+#include <string>   // for basic_string, string, to_string
+#include <utility>  // for pair, make_pair
+#include <vector>   // for vector
 
 namespace d12 {
 

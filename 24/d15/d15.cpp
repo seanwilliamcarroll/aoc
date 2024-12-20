@@ -1,11 +1,11 @@
+#include <core_lib.hpp> // for Coordinate, Grid, Tile, Position
 #include <d15.hpp>
-#include <core_lib.hpp>  // for Coordinate, Grid, Tile, Position
-#include <fstream>       // for basic_istream, basic_ifstream, getline, ifst...
-#include <map>           // for map
-#include <set>           // for set, __tree_const_iterator
-#include <stdexcept>     // for runtime_error
-#include <string>        // for basic_string, char_traits, string, to_string
-#include <utility>       // for swap, pair, make_pair
+#include <fstream>   // for basic_istream, basic_ifstream, getline, ifst...
+#include <map>       // for map
+#include <set>       // for set, __tree_const_iterator
+#include <stdexcept> // for runtime_error
+#include <string>    // for basic_string, char_traits, string, to_string
+#include <utility>   // for swap, pair, make_pair
 
 namespace d15 {
 
@@ -248,9 +248,7 @@ std::string part_1(const std::string &filepath) {
   Coordinate accumulator =
       simulate_and_get_gps_total(grid, instructions, is_wide);
 
-
   return std::to_string(accumulator);
-
 }
 
 std::string part_2(const std::string &filepath) {
@@ -266,7 +264,6 @@ std::string part_2(const std::string &filepath) {
       simulate_and_get_gps_total(wide_grid, instructions, is_wide);
 
   return std::to_string(accumulator);
-
 }
 
 } // namespace d15
