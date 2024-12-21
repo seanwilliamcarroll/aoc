@@ -31,6 +31,7 @@ target_link_libraries(all_tests-exe
   d17-lib
   d18-lib
   d19-lib
+  d20-lib
   GTest::gtest_main
 )
 

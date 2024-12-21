@@ -93,6 +93,7 @@ add_subdirectory(d16)
 add_subdirectory(d17)
 add_subdirectory(d18)
 add_subdirectory(d19)
+add_subdirectory(d20)
 
 add_subdirectory(test)
 
