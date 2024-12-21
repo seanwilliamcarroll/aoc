@@ -1,16 +1,18 @@
+#include <algorithm>    // for reverse
+#include <array>        // for array
+#include <cmath>        // for abs
+#include <core_lib.hpp> // for Position, Coordinate, Grid, Matrix2D, Tile
 #include <d20.hpp>
-#include <stddef.h>      // for size_t
-#include <algorithm>     // for reverse
-#include <array>         // for array
-#include <core_lib.hpp>  // for Position, is_in_bounds, Grid, Matrix2D, Tile
-#include <deque>         // for deque
-#include <limits>        // for numeric_limits
-#include <map>           // for map, __map_iterator
-#include <stdexcept>     // for runtime_error
-#include <string>        // for basic_string, string, to_string, operator+
-#include <tuple>         // for tuple
-#include <utility>       // for pair, make_pair, operator==
-#include <vector>        // for vector
+#include <deque>     // for deque
+#include <limits>    // for numeric_limits
+#include <map>       // for map, __map_iterator
+#include <stddef.h>  // for size_t
+#include <stdexcept> // for runtime_error
+#include <stdlib.h>  // for abs
+#include <string>    // for string, basic_string, to_string, operator+
+#include <tuple>     // for tuple
+#include <utility>   // for pair, make_pair, operator==
+#include <vector>    // for vector
 
 // clang-format off
 namespace d20 {
@@ -115,7 +117,8 @@ Positions find_shortest_path(const Grid &grid,
   return shortest_path;
 }
 
-std::vector<Cheat> find_all_cheats(const Grid &grid) {
+std::vector<Cheat> find_all_cheats(const Grid &grid,
+                                   const Coordinate total_distance) {
 
   std::vector<Cheat> cheats{};
 
@@ -134,6 +137,20 @@ std::vector<Cheat> find_all_cheats(const Grid &grid) {
     ++distance;
   }
 
+  // find all possible cheating positions
+  std::map<Position, Coordinate> cheating_increments;
+  for (Coordinate row_incr = (-total_distance); row_incr <= total_distance;
+       ++row_incr) {
+    for (Coordinate col_incr = (-total_distance); col_incr <= total_distance;
+         ++col_incr) {
+      const auto distance = std::abs(row_incr) + std::abs(col_incr);
+      if (distance > 0 && distance <= total_distance) {
+        const auto position = std::make_pair(row_incr, col_incr);
+        cheating_increments[position] = distance;
+      }
+    }
+  }
+
   // At each point on the path, try to cheat, but only if it brings us to a
   // point further away than we are now
   size_t position_index = 0;
@@ -142,88 +159,69 @@ std::vector<Cheat> find_all_cheats(const Grid &grid) {
   while (position != end) {
     // Try cheat
     const auto [row, col] = position;
-    for (const auto &[row_incr, col_incr] : MOVEMENTS) {
+    for (const auto &[incr, distance] : cheating_increments) {
+      const auto [row_incr, col_incr] = incr;
       const auto new_row = row + row_incr;
       const auto new_col = col + col_incr;
       if (!is_in_bounds(grid, new_row, new_col)) {
         continue;
       }
-      if (grid[new_row][new_col] == WALL) {
-        auto new_new_row = new_row + row_incr;
-        auto new_new_col = new_col + col_incr;
-        Position cheat_end = std::make_pair(new_new_row, new_new_col);
-        if (distance_so_far[cheat_end] > (distance_so_far[position] + 2)) {
-          cheats.emplace_back(position, cheat_end,
-                              distance_so_far[cheat_end] -
-                                  (distance_so_far[position] + 2));
-        }
-        if (is_in_bounds(grid, new_new_row, new_new_col) &&
-            grid[new_new_row][new_new_col] == WALL) {
-          new_new_row = new_row + 2 * row_incr;
-          new_new_col = new_col + 2 * col_incr;
-          cheat_end = std::make_pair(new_new_row, new_new_col);
-          if (distance_so_far[cheat_end] > (distance_so_far[position] + 2)) {
-            cheats.emplace_back(position, cheat_end,
-                                distance_so_far[cheat_end] -
-                                    (distance_so_far[position] + 2));
-          }
-        }
+      Position cheat_end = std::make_pair(new_row, new_col);
+      if (distance_so_far[cheat_end] > (distance_so_far[position] + distance)) {
+        cheats.emplace_back(position, cheat_end,
+                            distance_so_far[cheat_end] -
+                                (distance_so_far[position] + distance));
       }
     }
     position = shortest_path[position_index];
     position_index++;
   }
-  
+
   return cheats;
+}
+
+size_t number_of_cheats_at_least_100_savings(const Grid &grid,
+                                             const Coordinate total_distance) {
+
+  const auto [last_position, shortest_so_far] = find_shortest_paths(grid);
+
+  const auto shortest_path = find_shortest_path(grid, last_position);
+
+  const auto cheats = find_all_cheats(grid, total_distance);
+
+  std::map<size_t, size_t> savings_counts;
+
+  for (const auto &[cheat_begin, cheat_end, savings] : cheats) {
+    ++savings_counts[savings];
+  }
+
+  size_t at_least_100{};
+  for (const auto &[savings, count] : savings_counts) {
+    if (savings >= 100) {
+      at_least_100 += count;
+    }
+  }
+
+  return at_least_100;
 }
 
 std::string part_1(const std::string &filepath) {
 
   const auto grid = get_lines_from_file(filepath);
 
-  // print_lines(grid);
-
-
-  const auto [last_position, shortest_so_far] = find_shortest_paths(grid);
-
-  const auto shortest_path = find_shortest_path(grid, last_position);
-
-  // std::cout << "shortest path to end: "
-  //           << shortest_so_far[end.first][end.second] << std::endl;
-
-  // std::cout << "START: " << start.first << " " << start.second << std::endl;
-  // std::cout << "END: " << end.first << " " << end.second << std::endl;
-
-  // for (const auto &[row, col] : shortest_path) {
-  //   std::cout << row << " " << col << " -> ";
-  // }
-  // std::cout << std::endl;
-
-  const auto cheats = find_all_cheats(grid);
-
-
-  std::map<size_t, size_t> savings_counts;
-
-  for (const auto &[cheat_begin, cheat_end, savings] : cheats) {
-    // std::cout << "Saved: " << savings << " [" << cheat_begin.first << ", "
-    //           << cheat_begin.second << "] -> [" << cheat_end.first << ", "
-    //           << cheat_end.second << "]" << std::endl;
-    ++savings_counts[savings];
-  }
-
-  size_t at_least_100{};
-  for (const auto &[savings, count] : savings_counts) {
-    // std::cout << "Found " << count << " with savings of " << savings
-    //           << std::endl;
-    if (savings >= 100) {
-      at_least_100 += count;
-    }
-  }  
+  const auto at_least_100 = number_of_cheats_at_least_100_savings(grid, 2);
 
   return std::to_string(at_least_100);
 }
 
-std::string part_2(const std::string &filepath) { return std::string(); }
+std::string part_2(const std::string &filepath) {
+
+  const auto grid = get_lines_from_file(filepath);
+
+  const auto at_least_100 = number_of_cheats_at_least_100_savings(grid, 20);
+
+  return std::to_string(at_least_100);
+}
 
 // clang-format off
 } // namespace d20
