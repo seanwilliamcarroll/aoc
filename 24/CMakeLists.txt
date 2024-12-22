@@ -95,6 +95,7 @@ add_subdirectory(d18)
 add_subdirectory(d19)
 add_subdirectory(d20)
 add_subdirectory(d21)
+add_subdirectory(d22)
 
 add_subdirectory(test)
 
