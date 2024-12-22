@@ -18,6 +18,7 @@
 #include <d18.hpp>       // for part_1, part_2
 #include <d19.hpp>       // for part_1, part_2
 #include <d20.hpp>       // for part_1, part_2
+#include <d21.hpp>       // for part_1, part_2
 #include <fstream>       // for basic_ifstream, getline, basic_ostream, endl
 #include <gtest/gtest.h> // for Test, Message, EXPECT_EQ, TestInfo (ptr only)
 #include <iostream>      // for cout
@@ -95,6 +96,8 @@ TEST(Daily, D18) { MY_TEST(18); }
 TEST(Daily, D19) { MY_TEST(19); }
 
 TEST(Daily, D20) { MY_TEST(20); }
+
+TEST(Daily, D21) { MY_TEST(21); }
 
 #undef MY_XSTR
 #undef MY_STR
