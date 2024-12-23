@@ -96,7 +96,8 @@ add_subdirectory(d19)
 add_subdirectory(d20)
 add_subdirectory(d21)
 add_subdirectory(d22)
+add_subdirectory(d23)
 
 add_subdirectory(test)
 
-# add_subdirectory(term_app)
+# add_subdirectory(my_term_app)
