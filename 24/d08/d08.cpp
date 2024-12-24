@@ -19,7 +19,9 @@ using Positions = std::vector<Position>;
 
 using AntennaPositions = std::unordered_map<Antenna, Positions>;
 
-bool is_antenna(const Tile input) { return std::isalnum(input); }
+bool is_antenna(const Tile input) {
+  return std::isalnum(input);
+}
 
 AntennaPositions get_antenna_positions(const AntennaMap &antenna_map) {
   AntennaPositions antenna_positions;

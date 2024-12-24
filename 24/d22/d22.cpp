@@ -26,9 +26,13 @@ Values get_values_from_file(const std::string &filepath) {
   return values;
 }
 
-Value mix(const Value left, const Value right) { return left ^ right; }
+Value mix(const Value left, const Value right) {
+  return left ^ right;
+}
 
-Value prune(const Value value) { return value % (16777216ULL); }
+Value prune(const Value value) {
+  return value % (16777216ULL);
+}
 
 Value mult_mix_prune(const Value value, const Value mult) {
   Value output = value;
