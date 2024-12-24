@@ -35,6 +35,7 @@ target_link_libraries(all_tests-exe
   d21-lib
   d22-lib
   d23-lib
+  d24-lib
   GTest::gtest_main
 )
 
