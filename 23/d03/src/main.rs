@@ -9,11 +9,10 @@ struct NumberPos {
 }
 
 fn is_symbol(character: char) -> bool {
-    !character.is_digit(10) && character != '.'
+    !character.is_ascii_digit() && character != '.'
 }
 
-fn get_character_at(grid: &Vec<String>, row_index: usize, col_index: usize) -> char {
-    // println!("Check character at ({row_index}, {col_index})");
+fn get_character_at(grid: &[String], row_index: usize, col_index: usize) -> char {
     grid[row_index]
         .chars()
         .nth(col_index)
@@ -40,12 +39,11 @@ fn main() -> std::io::Result<()> {
 
     // Find all numbers and their positions
     for (row_index, row) in schematic.iter().enumerate() {
-        let mut current_number = "".to_string();
+        let mut current_number = String::new();
         for (col_index, character) in row.chars().enumerate() {
-            if character.is_digit(10) {
+            if character.is_ascii_digit() {
                 current_number.push(character);
-            } else if current_number.len() > 0 {
-                // println!("Number: {}", current_number);
+            } else if !current_number.is_empty() {
                 number_map.push((
                     current_number
                         .parse::<u32>()
@@ -56,11 +54,10 @@ fn main() -> std::io::Result<()> {
                         string_len: current_number.len(),
                     },
                 ));
-                current_number = "".to_string();
+                current_number = String::new();
             }
         }
-        if current_number.len() > 0 {
-            // println!("Number: {}", current_number);
+        if !current_number.is_empty() {
             number_map.push((
                 current_number
                     .parse::<u32>()
@@ -87,7 +84,6 @@ fn main() -> std::io::Result<()> {
         },
     ) in number_map
     {
-        // println!("Number: {number} at ({row_index}, {col_index}) of length: {string_len} with character: {character}");
         let row_begin = if row_index == 0 {
             row_index
         } else {
@@ -109,12 +105,16 @@ fn main() -> std::io::Result<()> {
             col_index + string_len
         };
         let mut found = false;
-        // println!("Number: {number} at ({row_index}, {col_index}) of length: {string_len}");
-        for row_iter in row_begin..row_end + 1 {
-            for col_iter in col_begin..col_end + 1 {
+        for row_iter in row_begin..=row_end {
+            for col_iter in col_begin..=col_end {
+                if row_iter == row_index
+                    && col_iter >= col_index
+                    && col_iter < col_index + string_len
+                {
+                    continue;
+                }
                 let character = get_character_at(&schematic, row_iter, col_iter);
                 if is_symbol(character) {
-                    // println!("Found char: {character}");
                     if character == '*' {
                         if let Some(old_gear) = found_gears.get(&(row_iter, col_iter)) {
                             sum_p2 += old_gear * number;
@@ -134,8 +134,8 @@ fn main() -> std::io::Result<()> {
             }
         }
     }
-    println!("Sum P1: {}", sum_p1);
-    println!("Sum P2: {}", sum_p2);
+    println!("Sum P1: {sum_p1}");
+    println!("Sum P2: {sum_p2}");
 
     Ok(())
 }
