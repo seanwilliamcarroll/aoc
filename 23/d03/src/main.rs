@@ -104,8 +104,7 @@ fn main() -> std::io::Result<()> {
         } else {
             col_index + string_len
         };
-        let mut found = false;
-        for row_iter in row_begin..=row_end {
+        'row_loop: for row_iter in row_begin..=row_end {
             for col_iter in col_begin..=col_end {
                 if row_iter == row_index
                     && col_iter >= col_index
@@ -123,14 +122,8 @@ fn main() -> std::io::Result<()> {
                         }
                     }
                     sum_p1 += number;
-                    found = true;
+                    break 'row_loop;
                 }
-                if found {
-                    break;
-                }
-            }
-            if found {
-                break;
             }
         }
     }
