@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -12,7 +13,7 @@ fn is_symbol(character: char) -> bool {
 }
 
 fn get_character_at(grid: &Vec<String>, row_index: usize, col_index: usize) -> char {
-    println!("Check character at ({row_index}, {col_index})");
+    // println!("Check character at ({row_index}, {col_index})");
     grid[row_index]
         .chars()
         .nth(col_index)
@@ -73,7 +74,10 @@ fn main() -> std::io::Result<()> {
         }
     }
 
+    let mut found_gears = HashMap::<(usize, usize), u32>::new();
+
     let mut sum_p1 = 0;
+    let mut sum_p2 = 0;
     for (
         number,
         NumberPos {
@@ -105,12 +109,19 @@ fn main() -> std::io::Result<()> {
             col_index + string_len
         };
         let mut found = false;
-        println!("Number: {number} at ({row_index}, {col_index}) of length: {string_len}");
+        // println!("Number: {number} at ({row_index}, {col_index}) of length: {string_len}");
         for row_iter in row_begin..row_end + 1 {
             for col_iter in col_begin..col_end + 1 {
                 let character = get_character_at(&schematic, row_iter, col_iter);
                 if is_symbol(character) {
-                    println!("Found char: {character}");
+                    // println!("Found char: {character}");
+                    if character == '*' {
+                        if let Some(old_gear) = found_gears.get(&(row_iter, col_iter)) {
+                            sum_p2 += old_gear * number;
+                        } else {
+                            found_gears.insert((row_iter, col_iter), number);
+                        }
+                    }
                     sum_p1 += number;
                     found = true;
                 }
@@ -124,6 +135,7 @@ fn main() -> std::io::Result<()> {
         }
     }
     println!("Sum P1: {}", sum_p1);
+    println!("Sum P2: {}", sum_p2);
 
     Ok(())
 }
