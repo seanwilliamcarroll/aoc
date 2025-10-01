@@ -5,48 +5,47 @@ use std::io::{self, BufRead};
 type RawLines = Vec<String>;
 
 struct Game {
-    _id: u32,
-    winning_numbers: Vec<u32>,
-    drawn_numbers: Vec<u32>,
+    winning_numbers: Vec<usize>,
+    drawn_numbers: Vec<usize>,
 }
 
 impl Game {
     fn from_str(line: &str) -> Game {
-        let (id_string, remainder) = line.split_once(':').expect("Bad formatting");
-        let (winning_numbers, drawn_numbers) = remainder.split_once('|').expect("Bad formatting");
-        fn parse_nums(input: &str) -> Vec<u32> {
+        fn parse_nums(input: &str) -> Vec<usize> {
             input
                 .split(' ')
                 .filter(|word| !word.is_empty())
-                .map(|number| number.parse::<u32>().expect("Bad formatting"))
+                .map(|number| number.parse::<usize>().expect("Bad formatting"))
                 .collect()
         }
-        let (_, id_string) = id_string.split_once("Card ").expect("Bad formatting");
-        let id = id_string
-            .trim_start()
-            .parse::<u32>()
-            .expect("Bad formatting");
-        let winning_numbers: Vec<u32> = parse_nums(winning_numbers);
-        let drawn_numbers: Vec<u32> = parse_nums(drawn_numbers);
+        let (_, remainder) = line.split_once(':').expect("Bad formatting");
+        let (winning_numbers, drawn_numbers) = remainder.split_once('|').expect("Bad formatting");
+        let winning_numbers: Vec<usize> = parse_nums(winning_numbers);
+        let drawn_numbers: Vec<usize> = parse_nums(drawn_numbers);
         Game {
-            _id: id,
             winning_numbers,
             drawn_numbers,
         }
     }
 
-    fn score_game(&self) -> u32 {
-        let winning_numbers: HashSet<u32> =
-            HashSet::from_iter(self.winning_numbers.iter().cloned());
-        let num_matches: u32 = self
-            .drawn_numbers
+    fn get_num_matches(&self) -> usize {
+        let winning_numbers: HashSet<usize> = self.winning_numbers.iter().copied().collect();
+        self.drawn_numbers
             .iter()
-            .map(|num| if winning_numbers.contains(num) { 1 } else { 0 })
-            .sum();
+            .map(|num| usize::from(winning_numbers.contains(num)))
+            .sum()
+    }
+
+    fn score_game(&self) -> usize {
+        let num_matches = self.get_num_matches();
         if num_matches == 0 {
-            0u32
+            0
         } else {
-            2u32.pow(num_matches - 1)
+            2usize.pow(
+                (num_matches - 1)
+                    .try_into()
+                    .expect("Shouldn't overflow here"),
+            )
         }
     }
 }
@@ -62,9 +61,20 @@ fn main() -> std::io::Result<()> {
     println!("Found {} games in {filepath}", raw_lines.len());
     let games: Vec<Game> = raw_lines
         .iter()
-        .map(|game_str| Game::from_str(&game_str))
+        .map(|game_str| Game::from_str(game_str))
         .collect();
-    let summed_scores: u32 = games.iter().map(Game::score_game).sum();
+    let summed_scores: usize = games.iter().map(Game::score_game).sum();
     println!("Sum P1: {summed_scores}");
+
+    let mut card_counts: Vec<usize> = vec![1; games.len()];
+
+    for (index, game) in games.iter().enumerate() {
+        let num_matches = game.get_num_matches();
+        for copied_card_index in index + 1..=index + num_matches {
+            card_counts[copied_card_index] += card_counts[index];
+        }
+    }
+    println!("Sum P2: {}", card_counts.iter().sum::<usize>());
+
     Ok(())
 }
