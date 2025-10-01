@@ -8,6 +8,26 @@ struct NumberPos {
     string_len: usize,
 }
 
+struct RawData {
+    data: Vec<String>,
+}
+
+impl RawData {
+    fn from_file(filepath: &str) -> std::io::Result<Self> {
+        let file = File::open(filepath)?;
+
+        let reader = io::BufReader::new(file);
+        let mut data = Vec::<String>::new();
+        for line in reader.lines() {
+            let line = line?;
+            assert!(line.is_ascii());
+            data.push(line);
+        }
+
+        Ok(RawData { data })
+    }
+}
+
 fn is_symbol(character: char) -> bool {
     !character.is_ascii_digit() && character != '.'
 }
@@ -20,15 +40,7 @@ fn get_character_at(grid: &[String], row_index: usize, col_index: usize) -> char
 }
 
 fn main() -> std::io::Result<()> {
-    let file = File::open("input.txt")?;
-
-    let reader = io::BufReader::new(file);
-    let mut schematic = Vec::<String>::new();
-    for line in reader.lines() {
-        let line = line?;
-        assert!(line.is_ascii());
-        schematic.push(line);
-    }
+    let schematic = RawData::from_file("input.txt")?.data;
     println!(
         "Schematic of size: {} x {}",
         schematic.len(),
