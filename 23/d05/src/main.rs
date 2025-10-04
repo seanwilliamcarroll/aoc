@@ -21,6 +21,7 @@ impl Range {
         Self::safe_construct(start, length)
     }
 
+    #[allow(dead_code)]
     fn from_inclusive_range(start: Element, inclusive_end: Element) -> Self {
         Self::safe_construct(start, inclusive_end - start + 1)
     }
@@ -46,14 +47,13 @@ impl Range {
     }
 
     fn intersection(&self, other: &Self) -> Option<Self> {
-        if !self.does_overlap(other) {
-            None
-        } else {
+        if self.does_overlap(other) {
             let greatest_start = Element::max(self.start, other.start);
             let smallest_exclusive_end = Element::min(self.exclusive_end(), other.exclusive_end());
             let output = Self::from_exclusive_range(greatest_start, smallest_exclusive_end);
-            // println!("{other} intersects {self} at {output}");
             Some(output)
+        } else {
+            None
         }
     }
 
@@ -66,14 +66,9 @@ impl Range {
 
     fn difference(&self, other: &Self) -> Vec<Self> {
         // Could return 0, 1, or 2 ranges
-        let output = if !self.does_overlap(other) {
-            // println!("{self} doesn't overlap {other}");
+        if !self.does_overlap(other) {
             vec![self.clone()]
-        } else if self == other {
-            // println!("{self} == {other}");
-            vec![]
-        } else if other.contains(self) {
-            // println!("{self} is contained by {other}");
+        } else if self == other || other.contains(self) {
             vec![]
         } else if self.contains(other) {
             if self.start == other.start {
@@ -95,17 +90,7 @@ impl Range {
                 other.exclusive_end(),
                 self.exclusive_end(),
             )]
-        };
-        if output.is_empty() {
-            // println!("{self} diff {other} is empty");
-        } else {
-            // print!("{self} diff {other} is ");
-            // for range in &output {
-            //     print!("{range} ");
-            // }
-            // println!();
         }
-        output
     }
 
     fn union(&self, other: &Self) -> Option<Self> {
@@ -119,30 +104,18 @@ impl Range {
         }
     }
 
-    fn print_ranges(ranges: &Vec<Self>) {
-        for range in ranges {
-            print!("{range}, ");
-        }
-        println!();
-    }
-
     fn union_all(mut ranges: Vec<Self>) -> Vec<Self> {
         ranges.sort_by_key(|range| range.start);
         ranges.reverse();
-        // Self::print_ranges(&ranges);
 
         let mut output = vec![];
         while ranges.len() >= 2 {
             let range_1 = ranges.pop().expect("Just checked this");
             let range_0 = ranges.pop().expect("Just checked this");
 
-            // println!("Try union: {range_0} with {range_1}");
-
             if let Some(new_range) = range_0.union(&range_1) {
-                // println!("Succeed: {new_range}");
                 ranges.push(new_range);
             } else {
-                // println!("Fail");
                 output.push(range_1);
                 ranges.push(range_0);
             }
@@ -153,8 +126,6 @@ impl Range {
         }
 
         output.sort_by_key(|range| range.start);
-        // println!("Final");
-        // Self::print_ranges(&output);
         output
     }
 }
@@ -206,32 +177,18 @@ impl MapRange {
         let mut output = vec![];
         let mut intersected = None;
         if let Some(overlapping_range) = input_range.intersection(range) {
-            let printable = Self {
+            intersected = Some(Self {
                 input_start: overlapping_range.start,
                 output_start: self
                     .try_translate_point(overlapping_range.start)
                     .expect("I know it contains it"),
                 length: overlapping_range.length,
-            };
-            // println!("map: {range} intersects {self} at {overlapping_range}: becomes: {printable}");
-            intersected = Some(printable);
+            });
         }
         for diff_range in range.difference(&input_range) {
             output.push(Self::identity_map_from_range(&diff_range));
         }
 
-        // if let Some(intersected) = &intersected {
-        //     println!("{range} intersected at {intersected}");
-        // }
-
-        if output.is_empty() || (output.len() == 1 && *range == output[0].output_range()) {
-        } else {
-            // println!("{self} does not translate {range} at:");
-            // for output_range in &output {
-            //     print!("{output_range}, ");
-            // }
-            // println!("\n");
-        }
         (intersected, output)
     }
 
@@ -278,23 +235,20 @@ impl TranslatorMap {
         let mut input = vec![range.clone()];
         let mut output = vec![];
 
-        // println!("===== translate_range begin =====");
         for sub_map in &self.maps {
-            // println!("Try {sub_map}");
             let mut untranslated = vec![];
             let mut translated = vec![];
             for input_range in &input {
-                let (intersected, nonintersected) = sub_map.translate_range(&input_range);
+                let (intersected, nonintersected) = sub_map.translate_range(input_range);
                 if let Some(intersected) = intersected {
                     translated.push(intersected.output_range());
                 }
                 untranslated.extend(nonintersected.into_iter().map(|range| range.output_range()));
             }
-            output.extend(translated.drain(..));
+            output.append(&mut translated);
             input = untranslated;
         }
-        output.extend(input.drain(..));
-        // println!("===== translate_range end =======");
+        output.append(&mut input);
 
         Range::union_all(output)
     }
@@ -357,47 +311,34 @@ fn main() -> std::io::Result<()> {
         locations.iter().min().expect("Must be a min")
     );
 
-    println!("Seeds: {:?}", seed_ranges);
-
     let mut ranges = vec![];
-    while !seed_ranges.is_empty() {
-        let length = seed_ranges.pop().expect("Pairs");
+    while let Some(length) = seed_ranges.pop() {
         let range_start = seed_ranges.pop().expect("Pairs");
         ranges.push(Range::from_magnitude(range_start, length));
     }
 
-    // Range::print_ranges(&ranges);
     ranges = Range::union_all(ranges);
-    // Range::print_ranges(&ranges);
 
     let mut lowest = Element::MAX;
     for range in ranges {
-        println!("Try translate range: {range}");
         let mut output = vec![range.clone()];
         for map in &maps {
-            // println!("===== full mapping begin =====");
             let mut intermediate = vec![];
             for input_range in output {
                 let mut translated = map.translate_range(&input_range);
-                // println!("Translated: {:?}", translated);
-                intermediate.extend(translated.drain(..));
-                println!("Translated {input_range} to ");
-                Range::print_ranges(&intermediate);
+                intermediate.append(&mut translated);
             }
             output = intermediate;
-            // println!("===== full mapping end =======");
         }
         let local_lowest = output
             .iter()
             .map(|element| element.start)
             .min()
             .expect("Something here");
-        println!("Local Lowest: {}", local_lowest);
         lowest = Element::min(lowest, local_lowest);
-        println!();
     }
 
-    println!("P2 location: {}", lowest);
+    println!("P2 location: {lowest}");
 
     Ok(())
 }
