@@ -13,6 +13,7 @@ type Bid = usize;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 enum Card {
+    Joker,
     Two,
     Three,
     Four,
@@ -47,6 +48,26 @@ impl Card {
             _ => panic!("Invalid card!"),
         }
     }
+
+    fn to_joker_rules(self) -> Self {
+        match self {
+            Self::Jack => Self::Joker,
+            other => other.clone(),
+        }
+    }
+}
+
+type Hand = [Card; 5];
+
+fn make_hand(line: &str) -> Hand {
+    assert!(line.len() == 5);
+    [
+        Card::from_char(line.chars().nth(0).expect("Bad formatting")),
+        Card::from_char(line.chars().nth(1).expect("Bad formatting")),
+        Card::from_char(line.chars().nth(2).expect("Bad formatting")),
+        Card::from_char(line.chars().nth(3).expect("Bad formatting")),
+        Card::from_char(line.chars().nth(4).expect("Bad formatting")),
+    ]
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -61,19 +82,8 @@ enum Scores {
 }
 
 impl Scores {
-    fn from_hand(hand: &Hand) -> Self {
-        let mut unique_cards = HashMap::new();
-
-        for card in hand {
-            *unique_cards.entry(card).or_insert(0) += 1;
-        }
-
-        let mut unique_cards = unique_cards
-            .into_iter()
-            .map(|(card, count)| (card.clone(), count))
-            .collect::<Vec<(Card, usize)>>();
-        unique_cards.sort_by_key(|(_, count)| *count);
-
+    fn from_unique_cards_map(unique_cards_map: &HashMap<Card, usize>) -> Self {
+        let unique_cards = unique_cards_map_to_unique_cards_vec(unique_cards_map);
         match unique_cards[..] {
             [_, _, _, _, _] => Self::HighCard,
             [_, _, _, _] => Self::OnePair,
@@ -97,12 +107,45 @@ impl Scores {
             _ => panic!("Not possible"),
         }
     }
+
+    fn from_hand(hand: &Hand) -> Self {
+        let mut unique_cards_map = hand_to_unique_cards_map(hand);
+        if let Some(joker_count) = unique_cards_map.remove(&Card::Joker) {
+            let unique_cards = unique_cards_map_to_unique_cards_vec(&unique_cards_map);
+            match joker_count {
+                1 => match unique_cards[..] {
+                    [_, _, _, _] => Self::OnePair,
+                    [_, _, _] => Self::ThreeOfAKind,
+                    [(_, 1), (_, 3)] => Self::FourOfAKind,
+                    [(_, 2), (_, 2)] => Self::FullHouse,
+                    [_] => Self::FiveOfAKind,
+                    _ => panic!("Not possible"),
+                },
+                2 => match unique_cards[..] {
+                    [_, _, _] => Self::ThreeOfAKind,
+                    [_, _] => Self::FourOfAKind,
+                    [_] => Self::FiveOfAKind,
+                    _ => panic!("Not possible"),
+                },
+                3 => match unique_cards[..] {
+                    [(_, 1), (_, 1)] => Self::FourOfAKind,
+                    [(_, 2)] => Self::FiveOfAKind,
+                    _ => panic!("Not possible"),
+                },
+                4 => Self::FiveOfAKind,
+                5 => Self::FiveOfAKind,
+                _ => panic!("Not possible!"),
+            }
+        } else {
+            Self::from_unique_cards_map(&unique_cards_map)
+        }
+    }
 }
 
 fn hand_is_greater(hand_a: &Hand, hand_b: &Hand) -> bool {
     // Returns true if hand_a > hand_b
     let score_a = Scores::from_hand(hand_a);
-    let score_b = Scores::from_hand(hand_a);
+    let score_b = Scores::from_hand(hand_b);
     if score_a > score_b {
         true
     } else if score_a < score_b {
@@ -124,17 +167,22 @@ fn hand_is_greater(hand_a: &Hand, hand_b: &Hand) -> bool {
     }
 }
 
-type Hand = [Card; 5];
+fn hand_to_unique_cards_map(hand: &Hand) -> HashMap<Card, usize> {
+    let mut unique_cards = HashMap::new();
 
-fn make_hand(line: &str) -> Hand {
-    assert!(line.len() == 5);
-    [
-        Card::from_char(line.chars().nth(0).expect("Bad formatting")),
-        Card::from_char(line.chars().nth(1).expect("Bad formatting")),
-        Card::from_char(line.chars().nth(2).expect("Bad formatting")),
-        Card::from_char(line.chars().nth(3).expect("Bad formatting")),
-        Card::from_char(line.chars().nth(4).expect("Bad formatting")),
-    ]
+    for card in hand {
+        *unique_cards.entry(card.clone()).or_insert(0) += 1;
+    }
+    unique_cards
+}
+
+fn unique_cards_map_to_unique_cards_vec(unique_cards: &HashMap<Card, usize>) -> Vec<(Card, usize)> {
+    let mut unique_cards = unique_cards
+        .iter()
+        .map(|(card, count)| (card.clone(), *count))
+        .collect::<Vec<(Card, usize)>>();
+    unique_cards.sort_by_key(|(_, count)| *count);
+    unique_cards
 }
 
 struct HandBid {
@@ -203,6 +251,27 @@ fn main() -> std::io::Result<()> {
     }
 
     println!("P1 sum: {sum_p1}");
+
+    let mut sum_p2 = 0;
+    hand_bids = hand_bids
+        .into_iter()
+        .map(|HandBid { hand, bid }| HandBid {
+            hand: hand
+                .into_iter()
+                .map(Card::to_joker_rules)
+                .collect::<Vec<Card>>()
+                .try_into()
+                .expect("Must be 5"),
+            bid,
+        })
+        .collect::<Vec<HandBid>>();
+    hand_bids.sort();
+    for (index, hand_bid) in hand_bids.iter().enumerate() {
+        let index = index + 1usize;
+        sum_p2 += index * hand_bid.bid;
+    }
+
+    println!("P2 sum: {sum_p2}");
 
     Ok(())
 }
