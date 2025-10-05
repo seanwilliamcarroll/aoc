@@ -142,6 +142,38 @@ struct HandBid {
     bid: Bid,
 }
 
+impl Ord for HandBid {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let hand_a = &self.hand;
+        let hand_b = &other.hand;
+        let score_a = Scores::from_hand(hand_a);
+        let score_b = Scores::from_hand(hand_b);
+        if score_a == score_b {
+            if hand_is_greater(hand_a, hand_b) {
+                std::cmp::Ordering::Greater
+            } else {
+                std::cmp::Ordering::Less
+            }
+        } else {
+            score_a.cmp(&score_b)
+        }
+    }
+}
+
+impl PartialOrd for HandBid {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for HandBid {
+    fn eq(&self, other: &Self) -> bool {
+        self.hand == other.hand
+    }
+}
+
+impl Eq for HandBid {}
+
 impl HandBid {
     fn from_line(line: &str) -> Self {
         let (hand, bid) = line.split_once(' ').expect("Bad formatting");
@@ -162,21 +194,7 @@ fn main() -> std::io::Result<()> {
         .map(|line| HandBid::from_line(&line))
         .collect::<Vec<HandBid>>();
 
-    hand_bids.sort_by(
-        |HandBid { hand: hand_a, .. }, HandBid { hand: hand_b, .. }| {
-            let score_a = Scores::from_hand(hand_a);
-            let score_b = Scores::from_hand(hand_b);
-            if score_a == score_b {
-                if hand_is_greater(hand_a, hand_b) {
-                    std::cmp::Ordering::Greater
-                } else {
-                    std::cmp::Ordering::Less
-                }
-            } else {
-                score_a.cmp(&score_b)
-            }
-        },
-    );
+    hand_bids.sort();
 
     let mut sum_p1 = 0;
     for (index, hand_bid) in hand_bids.iter().enumerate() {
