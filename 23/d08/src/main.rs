@@ -60,13 +60,13 @@ struct Network {
 }
 
 impl Network {
-    fn from_lines(lines: RawLines) -> Self {
+    fn from_lines(lines: &RawLines) -> Self {
         let instructions = lines[0].to_string();
 
         let mut nodes = HashMap::new();
 
         for line in &lines[2..] {
-            let node = Node::from_line(&line);
+            let node = Node::from_line(line);
             nodes.insert(node.name, node);
         }
 
@@ -146,11 +146,11 @@ fn main() -> std::io::Result<()> {
 
     println!("Found {} instructions", raw_lines.len());
 
-    let network = Network::from_lines(raw_lines);
+    let network = Network::from_lines(&raw_lines);
 
     let (p1_steps, p1_end_node) = network.simulate(&START_NODE_NAME);
     assert!(p1_end_node == END_NODE_NAME);
-    println!("P1 steps: {}", p1_steps);
+    println!("P1 steps: {p1_steps}");
 
     let start_node_names: Vec<NodeName> = network.all_start_nodes();
 
