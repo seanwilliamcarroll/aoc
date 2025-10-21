@@ -15,11 +15,11 @@ type Tile = char;
 const GALAXY_TILE: Tile = '#';
 
 const P1_MAGNIFICATION_FACTOR: usize = 2;
-const P2_MAGNIFICATION_FACTOR: usize = 1000000;
+const P2_MAGNIFICATION_FACTOR: usize = 1_000_000;
 
 fn get_original_coordinates(lines: &RawLines) -> Vec<Coordinates> {
     let mut output = Vec::new();
-    for (row_index, row) in lines.into_iter().enumerate() {
+    for (row_index, row) in lines.iter().enumerate() {
         for (col_index, character) in row.chars().enumerate() {
             if character == GALAXY_TILE {
                 output.push((row_index, col_index));
@@ -69,10 +69,10 @@ fn main() -> std::io::Result<()> {
             if coordinates == inner_coordinates {
                 continue;
             }
-            if let Some(_) = all_pairings.get(&(*coordinates, *inner_coordinates)) {
+            if all_pairings.contains_key(&(*coordinates, *inner_coordinates)) {
                 continue;
             }
-            if let Some(_) = all_pairings.get(&(*inner_coordinates, *coordinates)) {
+            if all_pairings.contains_key(&(*inner_coordinates, *coordinates)) {
                 continue;
             }
             let (row_index_a, col_index_a) = *coordinates;
