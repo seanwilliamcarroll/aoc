@@ -81,6 +81,7 @@ fn substitute(conditions: &Vec<Condition>, subs: &Vec<Condition>) -> Vec<Conditi
     output
 }
 
+#[derive(Clone)]
 struct SpringRecord {
     springs: Vec<Condition>,
     damaged_groups: Vec<usize>,
@@ -137,6 +138,111 @@ impl SpringRecord {
 
         count
     }
+
+    fn count_possible_ways_dynamic_programming(&self) -> usize {
+        let pattern_length = self.springs.len();
+
+        let mut prefix_broken = vec![0usize; pattern_length + 1];
+        let mut prefix_working = vec![0usize; pattern_length + 1];
+        for index in 0..pattern_length {
+            prefix_broken[index + 1] =
+                prefix_broken[index] + ((self.springs[index] == Condition::Broken) as usize);
+            prefix_working[index + 1] =
+                prefix_working[index] + ((self.springs[index] == Condition::Working) as usize);
+        }
+
+        let has_broken_in_range = |begin: usize, end: usize| -> bool {
+            // Tells us that there is a broken spring somewhere in this range [begin, end)
+            prefix_broken[end] - prefix_broken[begin] > 0
+        };
+
+        let has_working_in_range = |begin: usize, end: usize| -> bool {
+            // Tells us that there is a working spring somewhere in this range [begin, end)
+            prefix_working[end] - prefix_working[begin] > 0
+        };
+
+        let mut ways_until_position = vec![0usize; pattern_length + 1];
+
+        ways_until_position[0] = 1usize;
+
+        for group_len in &self.damaged_groups {
+            let mut new_ways_until_position = vec![0usize; pattern_length + 1];
+
+            for position in 0..=(pattern_length) {
+                if ways_until_position[position] == 0 {
+                    continue;
+                }
+                if position > pattern_length {
+                    continue;
+                }
+                let max_start_index = if *group_len <= pattern_length {
+                    pattern_length - *group_len
+                } else {
+                    continue;
+                };
+                for start_position in position..=max_start_index {
+                    // Are we already within a group?
+                    if has_broken_in_range(position, start_position) {
+                        break;
+                    }
+
+                    // Can a group be placed in this new range
+                    if has_working_in_range(start_position, start_position + *group_len) {
+                        continue;
+                    }
+
+                    // Following the group, cannot have broken spring
+                    if start_position + *group_len < pattern_length
+                        && (self.springs[start_position + *group_len] == Condition::Broken)
+                    {
+                        continue;
+                    }
+
+                    let next_allowed_position = if start_position + *group_len < pattern_length {
+                        start_position + *group_len + 1
+                    } else {
+                        pattern_length
+                    };
+                    new_ways_until_position[next_allowed_position] += ways_until_position[position];
+                }
+            }
+            ways_until_position = new_ways_until_position;
+        }
+
+        let mut total_ways = 0usize;
+
+        // After all the groups have been placed,
+        // we need to check there are no more brokens in the rest of the pattern
+        for position in 0..=pattern_length {
+            if ways_until_position[position] == 0 {
+                continue;
+            }
+            if !has_broken_in_range(position, pattern_length) {
+                total_ways += ways_until_position[position];
+            }
+        }
+
+        total_ways
+    }
+
+    fn unfold(&self) -> Self {
+        let mut unfolded = self.clone();
+        unfolded.springs.push(Condition::Unknown);
+        unfolded.springs.extend(self.springs.iter());
+        unfolded.springs.push(Condition::Unknown);
+        unfolded.springs.extend(self.springs.iter());
+        unfolded.springs.push(Condition::Unknown);
+        unfolded.springs.extend(self.springs.iter());
+        unfolded.springs.push(Condition::Unknown);
+        unfolded.springs.extend(self.springs.iter());
+
+        unfolded.damaged_groups.extend(self.damaged_groups.iter());
+        unfolded.damaged_groups.extend(self.damaged_groups.iter());
+        unfolded.damaged_groups.extend(self.damaged_groups.iter());
+        unfolded.damaged_groups.extend(self.damaged_groups.iter());
+
+        unfolded
+    }
 }
 
 impl std::fmt::Display for SpringRecord {
@@ -164,6 +270,17 @@ fn main() -> std::io::Result<()> {
         .sum();
 
     println!("P1 Solution: {p1_solution}");
+
+    let p2_solution: usize = spring_records
+        .iter()
+        .map(|spring_record| {
+            spring_record
+                .unfold()
+                .count_possible_ways_dynamic_programming()
+        })
+        .sum();
+
+    println!("P2 Solution: {p2_solution}");
 
     Ok(())
 }
