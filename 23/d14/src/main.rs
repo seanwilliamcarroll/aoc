@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -12,8 +13,9 @@ type Tile = char;
 
 const MOVEABLE_STONE: Tile = 'O';
 const EMPTY_TILE: Tile = '.';
-const IMMOVEABLE_STONE: Tile = '#';
+// const IMMOVEABLE_STONE: Tile = '#';
 
+#[derive(Clone)]
 struct Field {
     field: Vec<Vec<Tile>>,
 }
@@ -33,6 +35,9 @@ impl Field {
     }
 
     fn print_field(&self) {
+        println!(
+            "================================================================================"
+        );
         for row in &self.field {
             for tile in row {
                 print!("{tile}");
@@ -41,29 +46,125 @@ impl Field {
         }
     }
 
-    fn roll_north(&self) -> Self {
-        let mut field = self.field.clone();
-
-        for row_index in 0..field.len() {
-            let row = field[row_index].clone();
-
-            for col_index in 0..row.len() {
-                let tile = &row[col_index];
+    fn roll_north(&mut self) {
+        for row_index in 0..self.field.len() {
+            for col_index in 0..self.field[row_index].len() {
+                let tile = self.field[row_index][col_index];
 
                 let mut cur_row_index = row_index;
 
-                if *tile == MOVEABLE_STONE {
-                    while cur_row_index > 0
-                        && Field::can_move(&field, (cur_row_index - 1, col_index))
-                    {
-                        field[cur_row_index][col_index] = EMPTY_TILE;
-                        cur_row_index -= 1;
-                        field[cur_row_index][col_index] = MOVEABLE_STONE;
-                    }
+                if tile != MOVEABLE_STONE {
+                    continue;
+                }
+                while cur_row_index > 0
+                    && Field::can_move(&self.field, (cur_row_index - 1, col_index))
+                {
+                    self.field[cur_row_index][col_index] = EMPTY_TILE;
+                    cur_row_index -= 1;
+                    self.field[cur_row_index][col_index] = MOVEABLE_STONE;
                 }
             }
         }
-        Self { field }
+    }
+
+    fn roll_west(&mut self) {
+        for col_index in 0..self.field[0].len() {
+            for row_index in 0..self.field.len() {
+                let tile = self.field[row_index][col_index];
+
+                let mut cur_col_index = col_index;
+
+                if tile != MOVEABLE_STONE {
+                    continue;
+                }
+                while cur_col_index > 0
+                    && Field::can_move(&self.field, (row_index, cur_col_index - 1))
+                {
+                    self.field[row_index][cur_col_index] = EMPTY_TILE;
+                    cur_col_index -= 1;
+                    self.field[row_index][cur_col_index] = MOVEABLE_STONE;
+                }
+            }
+        }
+    }
+
+    fn roll_south(&mut self) {
+        for row_index in (0..self.field.len()).rev() {
+            for col_index in 0..self.field[row_index].len() {
+                let tile = self.field[row_index][col_index];
+
+                let mut cur_row_index = row_index;
+
+                if tile != MOVEABLE_STONE {
+                    continue;
+                }
+                while cur_row_index < self.field.len() - 1
+                    && Field::can_move(&self.field, (cur_row_index + 1, col_index))
+                {
+                    self.field[cur_row_index][col_index] = EMPTY_TILE;
+                    cur_row_index += 1;
+                    self.field[cur_row_index][col_index] = MOVEABLE_STONE;
+                }
+            }
+        }
+    }
+
+    fn roll_east(&mut self) {
+        for col_index in (0..self.field[0].len()).rev() {
+            for row_index in 0..self.field.len() {
+                let tile = self.field[row_index][col_index];
+
+                let mut cur_col_index = col_index;
+
+                if tile != MOVEABLE_STONE {
+                    continue;
+                }
+                while cur_col_index < self.field[0].len() - 1
+                    && Field::can_move(&self.field, (row_index, cur_col_index + 1))
+                {
+                    self.field[row_index][cur_col_index] = EMPTY_TILE;
+                    cur_col_index += 1;
+                    self.field[row_index][cur_col_index] = MOVEABLE_STONE;
+                }
+            }
+        }
+    }
+
+    fn roll_one_cycle(&mut self) {
+        self.roll_north();
+        self.roll_west();
+        self.roll_south();
+        self.roll_east();
+    }
+
+    fn roll_1000000000_cycles(&mut self) {
+        let mut seen_so_far: HashSet<Vec<Vec<Tile>>> = HashSet::new();
+
+        self.roll_one_cycle();
+
+        let mut num_cycles = 1;
+
+        while seen_so_far.insert(self.field.clone()) {
+            self.roll_one_cycle();
+            num_cycles += 1;
+        }
+
+        let initial_rolls = num_cycles;
+
+        let end_field = self.field.clone();
+
+        self.roll_one_cycle();
+        num_cycles = 1;
+        while end_field != self.field {
+            self.roll_one_cycle();
+            num_cycles += 1;
+        }
+
+        num_cycles = (1000000000 - initial_rolls) % num_cycles;
+
+        for _ in 0..num_cycles {
+            self.roll_one_cycle()
+        }
     }
 
     fn can_move(field: &Vec<Vec<Tile>>, coordinates: (usize, usize)) -> bool {
@@ -90,11 +191,17 @@ fn main() -> std::io::Result<()> {
 
     println!("Found {} lines", raw_lines.len());
 
-    let field = Field::from_raw_lines(raw_lines);
+    let mut field = Field::from_raw_lines(raw_lines);
 
-    let field = field.roll_north();
+    let mut p1_field = field.clone();
 
-    println!("P1 Solution: {}", field.calculate_load());
+    p1_field.roll_north();
+
+    println!("P1 Solution: {}", p1_field.calculate_load());
+
+    field.roll_1000000000_cycles();
+
+    println!("P2 Solution: {}", field.calculate_load());
 
     Ok(())
 }
