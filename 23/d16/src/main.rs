@@ -85,6 +85,7 @@ struct Heading {
     coordinate: Coordinate,
 }
 
+#[derive(Clone)]
 struct MirrorField {
     grid: Grid<Tile>,
     energized: Grid<bool>,
@@ -201,18 +202,60 @@ impl MirrorField {
             .sum::<usize>()
     }
 
-    fn simulate_laser(&mut self) {
+    fn simulate_laser(&mut self, initial_heading: Heading) {
         let mut queue: VecDeque<Heading> = VecDeque::new();
 
-        queue.push_back(Heading {
-            direction: Direction::East,
-            coordinate: (0, 0),
-        });
+        queue.push_back(initial_heading);
 
         while let Some(new_heading) = queue.pop_front() {
             let new_headings = self.step_light(new_heading);
             queue.extend(new_headings.into_iter());
         }
+    }
+
+    fn simulate_laser_top_left(&mut self) {
+        self.simulate_laser(Heading {
+            direction: Direction::East,
+            coordinate: (0, 0),
+        });
+    }
+
+    fn simulate_all_lasers(&self) -> usize {
+        let mut energized = 0usize;
+
+        for row_index in 0..self.grid.len() {
+            let mut new_grid = self.clone();
+            new_grid.simulate_laser(Heading {
+                direction: Direction::East,
+                coordinate: (row_index, 0),
+            });
+            energized = usize::max(new_grid.count_energized(), energized);
+
+            new_grid = self.clone();
+            new_grid.simulate_laser(Heading {
+                direction: Direction::West,
+                coordinate: (row_index, self.grid[0].len() - 1),
+            });
+            energized = usize::max(new_grid.count_energized(), energized);
+        }
+
+        for col_index in 0..self.grid[0].len() {
+            let mut new_grid = self.clone();
+            new_grid.simulate_laser(Heading {
+                direction: Direction::South,
+                coordinate: (0, col_index),
+            });
+            energized = usize::max(new_grid.count_energized(), energized);
+
+            new_grid = self.clone();
+            new_grid.simulate_laser(Heading {
+                direction: Direction::North,
+                coordinate: (self.grid.len() - 1, col_index),
+            });
+            energized = usize::max(new_grid.count_energized(), energized);
+        }
+
+        energized
     }
 }
 
@@ -225,9 +268,13 @@ fn main() -> std::io::Result<()> {
 
     grid.print_size();
 
-    grid.simulate_laser();
+    grid.simulate_laser_top_left();
 
     println!("P1 Solution: {}", grid.count_energized());
+
+    grid = MirrorField::from_raw_lines(&raw_lines);
+
+    println!("P2 Solution: {}", grid.simulate_all_lasers());
 
     Ok(())
 }
