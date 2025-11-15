@@ -80,7 +80,7 @@ impl Direction {
 }
 
 #[derive(Eq, Hash, PartialEq, Clone)]
-struct Heading {
+struct Pose {
     direction: Direction,
     coordinate: Coordinate,
 }
@@ -89,7 +89,7 @@ struct Heading {
 struct MirrorField {
     grid: Grid<Tile>,
     energized: Grid<bool>,
-    seen_headings: HashSet<Heading>,
+    seen_poses: HashSet<Pose>,
 }
 
 impl MirrorField {
@@ -102,7 +102,7 @@ impl MirrorField {
         Self {
             grid,
             energized,
-            seen_headings: HashSet::new(),
+            seen_poses: HashSet::new(),
         }
     }
 
@@ -110,11 +110,11 @@ impl MirrorField {
         println!("{} x {} grid", self.grid.len(), self.grid[0].len());
     }
 
-    fn next_space(&self, heading: Heading) -> Option<Heading> {
-        let Heading {
+    fn next_space(&self, pose: Pose) -> Option<Pose> {
+        let Pose {
             direction,
             coordinate,
-        } = heading;
+        } = pose;
 
         let (row_index, col_index) = coordinate;
 
@@ -123,7 +123,7 @@ impl MirrorField {
                 if row_index == 0 {
                     None
                 } else {
-                    Some(Heading {
+                    Some(Pose {
                         direction,
                         coordinate: (row_index - 1, col_index),
                     })
@@ -133,7 +133,7 @@ impl MirrorField {
                 if col_index == self.grid[0].len() - 1 {
                     None
                 } else {
-                    Some(Heading {
+                    Some(Pose {
                         direction,
                         coordinate: (row_index, col_index + 1),
                     })
@@ -143,7 +143,7 @@ impl MirrorField {
                 if row_index == self.grid.len() - 1 {
                     None
                 } else {
-                    Some(Heading {
+                    Some(Pose {
                         direction,
                         coordinate: (row_index + 1, col_index),
                     })
@@ -153,7 +153,7 @@ impl MirrorField {
                 if col_index == 0 {
                     None
                 } else {
-                    Some(Heading {
+                    Some(Pose {
                         direction,
                         coordinate: (row_index, col_index - 1),
                     })
@@ -162,18 +162,18 @@ impl MirrorField {
         }
     }
 
-    fn step_light(&mut self, heading: Heading) -> Vec<Heading> {
-        // Light has just entered heading
-        // Need to mark cell as energized and return new headings as beam continues
+    fn step_light(&mut self, pose: Pose) -> Vec<Pose> {
+        // Light has just entered pose
+        // Need to mark cell as energized and return new poses as beam continues
 
-        if !self.seen_headings.insert(heading.clone()) {
+        if !self.seen_poses.insert(pose.clone()) {
             return vec![];
         }
 
-        let Heading {
+        let Pose {
             direction,
             coordinate,
-        } = heading;
+        } = pose;
         let (row_index, col_index) = coordinate;
 
         self.energized[row_index][col_index] = true;
@@ -184,11 +184,11 @@ impl MirrorField {
         let tile = self.grid[row_index][col_index];
 
         for new_direction in direction.next_directions(tile) {
-            if let Some(new_heading) = self.next_space(Heading {
+            if let Some(new_pose) = self.next_space(Pose {
                 direction: new_direction,
                 coordinate,
             }) {
-                output.push(new_heading);
+                output.push(new_pose);
             }
         }
 
@@ -202,19 +202,19 @@ impl MirrorField {
             .sum::<usize>()
     }
 
-    fn simulate_laser(&mut self, initial_heading: Heading) {
-        let mut queue: VecDeque<Heading> = VecDeque::new();
+    fn simulate_laser(&mut self, initial_pose: Pose) {
+        let mut queue: VecDeque<Pose> = VecDeque::new();
 
-        queue.push_back(initial_heading);
+        queue.push_back(initial_pose);
 
-        while let Some(new_heading) = queue.pop_front() {
-            let new_headings = self.step_light(new_heading);
-            queue.extend(new_headings.into_iter());
+        while let Some(new_pose) = queue.pop_front() {
+            let new_poses = self.step_light(new_pose);
+            queue.extend(new_poses.into_iter());
         }
     }
 
     fn simulate_laser_top_left(&mut self) {
-        self.simulate_laser(Heading {
+        self.simulate_laser(Pose {
             direction: Direction::East,
             coordinate: (0, 0),
         });
@@ -225,14 +225,14 @@ impl MirrorField {
 
         for row_index in 0..self.grid.len() {
             let mut new_grid = self.clone();
-            new_grid.simulate_laser(Heading {
+            new_grid.simulate_laser(Pose {
                 direction: Direction::East,
                 coordinate: (row_index, 0),
             });
             energized = usize::max(new_grid.count_energized(), energized);
 
             new_grid = self.clone();
-            new_grid.simulate_laser(Heading {
+            new_grid.simulate_laser(Pose {
                 direction: Direction::West,
                 coordinate: (row_index, self.grid[0].len() - 1),
             });
@@ -241,14 +241,14 @@ impl MirrorField {
 
         for col_index in 0..self.grid[0].len() {
             let mut new_grid = self.clone();
-            new_grid.simulate_laser(Heading {
+            new_grid.simulate_laser(Pose {
                 direction: Direction::South,
                 coordinate: (0, col_index),
             });
             energized = usize::max(new_grid.count_energized(), energized);
 
             new_grid = self.clone();
-            new_grid.simulate_laser(Heading {
+            new_grid.simulate_laser(Pose {
                 direction: Direction::North,
                 coordinate: (self.grid.len() - 1, col_index),
             });
