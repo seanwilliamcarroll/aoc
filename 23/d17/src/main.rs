@@ -94,7 +94,7 @@ struct Route {
 // Store last direction traveled and how many steps you did before coming to square and score
 // If equal heat loss, store direction and distance if different
 
-fn find_lowest_heat_loss(grid: &Grid) -> usize {
+fn find_lowest_heat_loss(grid: &Grid, at_least_steps: usize, no_more_than_steps: usize) -> usize {
     // Want to have data structure that represents a point and all 4 entry points with all 3 possible steps into us
 
     let mut lhl_grid: Vec<Vec<HashMap<Step, usize>>> =
@@ -137,11 +137,14 @@ fn find_lowest_heat_loss(grid: &Grid) -> usize {
 
         for next_direction in direction.next_direction() {
             let new_steps = if next_direction == direction {
-                if steps == 3 {
+                if steps == no_more_than_steps {
                     continue;
                 }
                 steps + 1
             } else {
+                if steps < at_least_steps {
+                    continue;
+                }
                 1
             };
             if let Some(next_position) = next_direction.next_position(position, grid) {
@@ -155,8 +158,8 @@ fn find_lowest_heat_loss(grid: &Grid) -> usize {
     }
 
     let mut lowest_heat_loss = usize::MAX;
-    for heat_loss in lhl_grid[grid.len() - 1][grid[0].len() - 1].values() {
-        if lowest_heat_loss > *heat_loss {
+    for ((_, steps), heat_loss) in &lhl_grid[grid.len() - 1][grid[0].len() - 1] {
+        if lowest_heat_loss > *heat_loss && *steps >= at_least_steps {
             lowest_heat_loss = *heat_loss;
         }
     }
@@ -173,9 +176,13 @@ fn main() -> std::io::Result<()> {
 
     println!("{} x {} grid", grid.len(), grid[0].len());
 
-    let p1_solution = find_lowest_heat_loss(&grid);
+    let p1_solution = find_lowest_heat_loss(&grid, 1, 3);
 
     println!("P1 Solution: {p1_solution}");
+
+    let p2_solution = find_lowest_heat_loss(&grid, 4, 10);
+
+    println!("P2 Solution: {p2_solution}");
 
     Ok(())
 }
