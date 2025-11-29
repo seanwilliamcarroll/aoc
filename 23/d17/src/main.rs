@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::BinaryHeap;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -85,10 +85,24 @@ impl Direction {
 
 type Step = (Direction, usize);
 
+#[derive(Eq, PartialEq)]
 struct Route {
     position: Position,
     last_step: Step,
     heat_so_far: usize,
+}
+
+impl PartialOrd for Route {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Route {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        // Should give us the reverse when we put into the Priority Queue
+        other.heat_so_far.cmp(&self.heat_so_far)
+    }
 }
 
 // Store last direction traveled and how many steps you did before coming to square and score
@@ -97,24 +111,26 @@ struct Route {
 fn find_lowest_heat_loss(grid: &Grid, at_least_steps: usize, no_more_than_steps: usize) -> usize {
     // Want to have data structure that represents a point and all 4 entry points with all 3 possible steps into us
 
-    let mut lhl_grid: Vec<Vec<HashMap<Step, usize>>> =
-        vec![vec![HashMap::new(); grid[0].len()]; grid.len()];
+    let mut lhl_grid: Vec<Vec<Vec<Vec<usize>>>> =
+        vec![vec![vec![vec![usize::MAX; no_more_than_steps + 1]; 4]; grid[0].len()]; grid.len()];
 
-    let mut next_attempts: VecDeque<Route> = VecDeque::new();
+    let mut next_attempts: BinaryHeap<Route> = BinaryHeap::new();
 
-    next_attempts.push_back(Route {
+    next_attempts.push(Route {
         position: (0, 1),
         last_step: (Direction::East, 1),
         heat_so_far: 0,
     });
 
-    next_attempts.push_back(Route {
+    next_attempts.push(Route {
         position: (1, 0),
         last_step: (Direction::South, 1),
         heat_so_far: 0,
     });
 
-    while let Some(route) = next_attempts.pop_front() {
+    // Using Min heap makes this into Dijkstra
+
+    while let Some(route) = next_attempts.pop() {
         let Route {
             position,
             last_step,
@@ -126,14 +142,10 @@ fn find_lowest_heat_loss(grid: &Grid, at_least_steps: usize, no_more_than_steps:
         let just_added_heat_loss = grid[row_index][col_index];
         let new_total_heat_loss = heat_so_far + just_added_heat_loss;
 
-        if let Some(heat_loss) = lhl_grid[row_index][col_index].get(&last_step) {
-            // Already have one, need to check if greater than old one
-            if *heat_loss <= new_total_heat_loss {
-                continue;
-            }
+        if lhl_grid[row_index][col_index][direction as usize][steps] <= new_total_heat_loss {
+            continue;
         }
-        // New local low for this point with entrance vec
-        lhl_grid[row_index][col_index].insert(last_step, new_total_heat_loss);
+        lhl_grid[row_index][col_index][direction as usize][steps] = new_total_heat_loss;
 
         for next_direction in direction.next_direction() {
             let new_steps = if next_direction == direction {
@@ -148,7 +160,7 @@ fn find_lowest_heat_loss(grid: &Grid, at_least_steps: usize, no_more_than_steps:
                 1
             };
             if let Some(next_position) = next_direction.next_position(position, grid) {
-                next_attempts.push_back(Route {
+                next_attempts.push(Route {
                     position: next_position,
                     last_step: (next_direction, new_steps),
                     heat_so_far: heat_so_far + just_added_heat_loss,
@@ -158,9 +170,11 @@ fn find_lowest_heat_loss(grid: &Grid, at_least_steps: usize, no_more_than_steps:
     }
 
     let mut lowest_heat_loss = usize::MAX;
-    for ((_, steps), heat_loss) in &lhl_grid[grid.len() - 1][grid[0].len() - 1] {
-        if lowest_heat_loss > *heat_loss && *steps >= at_least_steps {
-            lowest_heat_loss = *heat_loss;
+    for dir_grid in &lhl_grid[grid.len() - 1][grid[0].len() - 1] {
+        for (steps, heat_loss) in dir_grid.iter().enumerate() {
+            if lowest_heat_loss > *heat_loss && steps >= at_least_steps {
+                lowest_heat_loss = *heat_loss;
+            }
         }
     }
 
