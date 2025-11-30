@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -36,7 +35,6 @@ type Distance = i64;
 struct Instruction {
     direction: Direction,
     steps: Distance,
-    color_string: String,
 }
 
 impl Instruction {
@@ -44,31 +42,56 @@ impl Instruction {
         let (direction_str, remaining) = line.split_once(' ').expect("Bad formatting!");
 
         let direction = Direction::from_line(direction_str);
-        let (steps_str, color_str) = remaining.split_once(' ').expect("Bad formatting!");
+        let (steps_str, _) = remaining.split_once(' ').expect("Bad formatting!");
 
         let steps = steps_str.parse::<Distance>().expect("Bad formatting");
 
-        Self {
-            direction,
-            steps,
-            color_string: color_str.to_string(),
-        }
+        Self { direction, steps }
     }
 
-    fn from_raw_lines(lines: RawLines) -> Vec<Self> {
+    fn from_raw_hex_line(line: String) -> Self {
+        let (_, remaining) = line.split_once(' ').expect("Bad formatting!");
+
+        let (_, hex_str) = remaining.split_once(' ').expect("Bad formatting!");
+
+        let hex_str = hex_str.trim_matches(['(', ')', '#']);
+
+        assert!(hex_str.len() == 6);
+
+        let (steps_str, dir_str) = hex_str.split_at(5);
+
+        let direction = match dir_str {
+            "0" => Direction::Right,
+            "1" => Direction::Down,
+            "2" => Direction::Left,
+            "3" => Direction::Up,
+            _ => panic!("Unexpected char"),
+        };
+
+        let steps = Distance::from_str_radix(steps_str, 16).expect("Bad formatting");
+
+        Self { direction, steps }
+    }
+
+    fn from_raw_lines<F>(lines: RawLines, func: F) -> Vec<Self>
+    where
+        F: Fn(String) -> Self,
+    {
         lines
             .into_iter()
-            .map(|line| Self::from_raw_line(line))
+            .map(|line| func(line))
             .collect::<Vec<Self>>()
     }
 }
 
-fn grid_from_instructions(instructions: &Vec<Instruction>) -> Vec<Vec<char>> {
+fn get_vertices_and_return_area(instructions: &Vec<Instruction>) -> Distance {
     // Simulate digger
     let (mut row_position, mut col_position) = (0, 0);
 
     let (mut min_row, mut max_row) = (Distance::MAX, Distance::MIN);
     let (mut min_col, mut max_col) = (Distance::MAX, Distance::MIN);
+
+    let mut points: Vec<(Distance, Distance)> = vec![];
 
     for instruction in instructions {
         match instruction.direction {
@@ -89,60 +112,42 @@ fn grid_from_instructions(instructions: &Vec<Instruction>) -> Vec<Vec<char>> {
         max_row = Distance::max(row_position, max_row);
         min_col = Distance::min(col_position, min_col);
         max_col = Distance::max(col_position, max_col);
+        points.push((row_position, col_position));
     }
 
-    let mut grid: Vec<Vec<char>> =
-        vec![vec!['.'; (max_col - min_col + 1) as usize]; (max_row - min_row + 1) as usize];
+    let points = points
+        .iter()
+        .map(|(row, col)| (row + min_row.abs(), col + min_col.abs()))
+        .collect::<Vec<(Distance, Distance)>>();
 
-    row_position = min_row.abs();
-    col_position = min_col.abs();
+    // Try trapezoid formula for simple polygons?
 
-    for instruction in instructions {
-        for _ in 0..instruction.steps {
-            match instruction.direction {
-                Direction::Up => {
-                    row_position += 1;
-                }
-                Direction::Right => {
-                    col_position += 1;
-                }
-                Direction::Down => {
-                    row_position -= 1;
-                }
-                Direction::Left => {
-                    col_position -= 1;
-                }
-            }
-            grid[row_position as usize][col_position as usize] = '#';
-            assert!(row_position >= 0);
-            assert!(col_position >= 0);
-        }
+    let mut output: Distance = 0;
+    for index in 0..points.len() {
+        let (row_0, col_0) = points[index];
+        let (row_1, col_1) = points[(index + 1) % points.len()];
+
+        output += (col_0 + col_1) * (row_0 - row_1);
     }
 
-    let mut next_square: VecDeque<(usize, usize)> = VecDeque::new();
+    output = output / 2;
 
-    next_square.push_back((row_position as usize, (col_position + 1) as usize));
+    let mut perimeter = 0;
 
-    while let Some((new_row_index, new_col_index)) = next_square.pop_front() {
-        if grid[new_row_index][new_col_index] == '#' {
-            continue;
-        }
-        grid[new_row_index][new_col_index] = '#';
+    // Need to add the perimeter one more time
 
-        if new_row_index > 0 && grid[new_row_index - 1][new_col_index] != '#' {
-            next_square.push_back((new_row_index - 1, new_col_index));
-        }
-        if new_col_index > 0 && grid[new_row_index][new_col_index - 1] != '#' {
-            next_square.push_back((new_row_index, new_col_index - 1));
-        }
-        if new_row_index < grid.len() - 1 && grid[new_row_index + 1][new_col_index] != '#' {
-            next_square.push_back((new_row_index + 1, new_col_index));
-        }
-        if new_col_index < grid[0].len() - 1 && grid[new_row_index][new_col_index + 1] != '#' {
-            next_square.push_back((new_row_index, new_col_index + 1));
-        }
+    for index in 0..points.len() {
+        let (row_0, col_0) = points[index];
+        let (row_1, col_1) = points[(index + 1) % points.len()];
+
+        let side_length = (col_1 - col_0).abs() + (row_1 - row_0).abs();
+
+        perimeter += side_length;
     }
-    grid
+
+    // Weird conversion of perimeter due to how we count "squares" vs normal cartesian area
+
+    1 + output + perimeter / 2
 }
 
 fn main() -> std::io::Result<()> {
@@ -150,22 +155,21 @@ fn main() -> std::io::Result<()> {
 
     println!("Found {} lines", raw_lines.len());
 
-    let instructions = Instruction::from_raw_lines(raw_lines);
+    let instructions = Instruction::from_raw_lines(raw_lines.clone(), Instruction::from_raw_line);
 
     println!("Found {} instructions", instructions.len());
 
-    let grid = grid_from_instructions(&instructions);
-
-    let p1_solution = grid
-        .iter()
-        .map(|line| {
-            line.iter()
-                .map(|tile| (*tile == '#') as usize)
-                .sum::<usize>()
-        })
-        .sum::<usize>();
+    let p1_solution = get_vertices_and_return_area(&instructions);
 
     println!("P1 Solution: {p1_solution}");
+
+    let instructions = Instruction::from_raw_lines(raw_lines, Instruction::from_raw_hex_line);
+
+    println!("Found {} instructions", instructions.len());
+
+    let p2_solution = get_vertices_and_return_area(&instructions);
+
+    println!("P2 Solution: {p2_solution}");
 
     Ok(())
 }
