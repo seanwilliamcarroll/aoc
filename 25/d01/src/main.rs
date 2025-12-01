@@ -68,6 +68,38 @@ fn count_zeros(turns: &Vec<Turn>) -> Measure {
     zeros
 }
 
+fn count_all_zeros(turns: &Vec<Turn>) -> Measure {
+    let mut zeros: Measure = 0;
+
+    let mut dial_pos: Measure = 50;
+
+    for turn in turns {
+        let rotations = turn.ticks / NUM_TICKS_DIAL;
+        let remainder = turn.ticks % NUM_TICKS_DIAL;
+
+        match turn.direction {
+            Direction::Left => {
+                if dial_pos != 0 && remainder > dial_pos {
+                    zeros += 1;
+                }
+                dial_pos = (dial_pos + (NUM_TICKS_DIAL - (remainder))) % NUM_TICKS_DIAL;
+            }
+            Direction::Right => {
+                if remainder + dial_pos > NUM_TICKS_DIAL {
+                    zeros += 1;
+                }
+                dial_pos = (dial_pos + remainder) % NUM_TICKS_DIAL;
+            }
+        }
+        if dial_pos == 0 {
+            zeros += 1;
+        }
+        zeros += rotations;
+    }
+
+    zeros
+}
+
 fn main() -> std::io::Result<()> {
     let raw_lines = read_from_file("input.txt")?;
 
@@ -80,6 +112,10 @@ fn main() -> std::io::Result<()> {
     let p1_solution = count_zeros(&turns);
 
     println!("P1 Solution: {p1_solution}");
+
+    let p2_solution = count_all_zeros(&turns);
+
+    println!("P2 Solution: {p2_solution}");
 
     Ok(())
 }
