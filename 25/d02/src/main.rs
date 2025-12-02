@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::{self, BufRead};
 
@@ -34,7 +35,7 @@ impl Range {
     }
 
     fn ten_to(exp: Unit) -> Unit {
-        10u32.pow(exp as u32) as Unit
+        10u64.pow(exp as u32) as Unit
     }
 
     fn get_upper_half(value: Unit) -> Unit {
@@ -43,7 +44,7 @@ impl Range {
         value / Self::ten_to(digit_count / 2)
     }
 
-    fn repeat_digits<F>(value: Unit, offset_func: F) -> Unit
+    fn next_repeated_digits<F>(value: Unit, offset_func: F) -> Unit
     where
         F: Fn(Unit) -> Unit,
     {
@@ -88,18 +89,18 @@ impl Range {
         // );
 
         // Check ends
-        let mut lower_end = Self::repeat_digits(lower_bound, |x| x);
-        let mut upper_end = Self::repeat_digits(upper_bound, |x| x);
+        let mut lower_end = Self::next_repeated_digits(lower_bound, |x| x);
+        let mut upper_end = Self::next_repeated_digits(upper_bound, |x| x);
 
         // println!("[{lower_end}, {upper_end}]");
 
         if !self.in_range(lower_end) {
             // count += lower_end;
-            lower_end = Self::repeat_digits(lower_bound, |x| x + 1);
+            lower_end = Self::next_repeated_digits(lower_bound, |x| x + 1);
         }
 
         if !self.in_range(upper_end) {
-            upper_end = Self::repeat_digits(upper_bound, |x| x - 1);
+            upper_end = Self::next_repeated_digits(upper_bound, |x| x - 1);
             // count += upper_end;
         }
         // println!("[{lower_end}, {upper_end}]");
@@ -135,6 +136,57 @@ impl Range {
         // println!();
         total_sum * multiplier
     }
+
+    fn sum_all_invalid_ids(&self) -> usize {
+        let num_digits = Self::count_digits(self.lower);
+
+        let mut total_sum = 0usize;
+
+        // println!("Num digits: {num_digits}");
+
+        let mut seen_so_far: HashSet<Unit> = HashSet::new();
+
+        for digit_count in num_digits..=(Self::count_digits(self.upper)) {
+            for divisor in 1..=(digit_count / 2) {
+                if divisor != 1 && digit_count % divisor != 0 {
+                    continue;
+                }
+                // println!(
+                //     "Try all repeaters with {} x {} digits",
+                //     digit_count / divisor,
+                //     divisor
+                // );
+
+                let mut current_repeated = 0;
+                for _ in 0..(digit_count / divisor) {
+                    current_repeated =
+                        current_repeated * Self::ten_to(divisor) + Self::ten_to(divisor - 1);
+                    // println!("current_repeated: {current_repeated}");
+                }
+
+                let increment = current_repeated / Self::ten_to(divisor - 1);
+
+                // println!("current_repeated: {current_repeated} increment: {increment}");
+
+                while current_repeated <= self.upper
+                    && current_repeated <= Self::ten_to(digit_count)
+                {
+                    if self.in_range(current_repeated)
+                        && Self::count_digits(current_repeated) % divisor == 0
+                        && !seen_so_far.contains(&current_repeated)
+                    {
+                        // println!("{current_repeated}");
+                        total_sum += current_repeated;
+                        seen_so_far.insert(current_repeated);
+                    }
+
+                    current_repeated += increment;
+                }
+            }
+        }
+
+        total_sum
+    }
 }
 
 fn main() -> std::io::Result<()> {
@@ -154,16 +206,22 @@ fn main() -> std::io::Result<()> {
     println!("Found {} ranges", ranges.len());
 
     let mut p1_solution = 0usize;
+    let mut p2_solution = 0usize;
     for range in &ranges {
         let sum = range.sum_invalid_ids();
         // if sum > 0 {
         //     println!("Range has {} total", sum);
         // }
         p1_solution += sum;
+
+        // println!("[{}, {}]", range.lower, range.upper);
+
         // break;
+        p2_solution += range.sum_all_invalid_ids();
     }
 
     println!("P1 Solution: {p1_solution}");
+    println!("P2 Solution: {p2_solution}");
 
     Ok(())
 }
