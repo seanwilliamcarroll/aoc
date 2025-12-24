@@ -1,4 +1,4 @@
-use common::{RawLines, read_from_file};
+use common::{RawLines, get_input_file, read_from_file};
 
 type Unit = usize;
 
@@ -65,7 +65,8 @@ fn get_ranges_and_ids_from_raw_lines(lines: RawLines) -> (Vec<Range>, Vec<Unit>)
 }
 
 fn main() -> std::io::Result<()> {
-    let raw_lines = read_from_file("input.txt")?;
+    let filepath = get_input_file()?;
+    let raw_lines = read_from_file(&filepath)?;
 
     println!("Found {} lines", raw_lines.len());
 

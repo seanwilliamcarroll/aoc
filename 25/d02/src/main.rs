@@ -1,4 +1,4 @@
-use common::read_from_file;
+use common::{get_input_file, read_from_file};
 use std::collections::HashSet;
 
 type Unit = usize;
@@ -102,7 +102,10 @@ impl Range {
             return 0usize;
         }
 
-        assert!(Self::count_digits(lower_end) == Self::count_digits(upper_end), "Need to handle this case");
+        assert!(
+            Self::count_digits(lower_end) == Self::count_digits(upper_end),
+            "Need to handle this case"
+        );
 
         let minimum_upper_half = Self::get_upper_half(lower_end);
 
@@ -180,7 +183,8 @@ impl Range {
 }
 
 fn main() -> std::io::Result<()> {
-    let raw_lines = read_from_file("input.txt")?;
+    let filepath = get_input_file()?;
+    let raw_lines = read_from_file(&filepath)?;
 
     println!("Found {} lines", raw_lines.len());
 

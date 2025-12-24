@@ -1,4 +1,4 @@
-use common::{RawLines, read_from_file};
+use common::{RawLines, get_input_file, read_from_file};
 
 type Unit = usize;
 
@@ -109,10 +109,7 @@ impl MathProblem {
                 continue;
             }
 
-            let digits = row
-                .chars()
-                .filter(char::is_ascii_digit)
-                .collect::<String>();
+            let digits = row.chars().filter(char::is_ascii_digit).collect::<String>();
 
             nums.push(digits.parse::<Unit>().expect("Just checked"));
 
@@ -137,7 +134,8 @@ impl MathProblem {
 }
 
 fn main() -> std::io::Result<()> {
-    let raw_lines = read_from_file("input.txt")?;
+    let filepath = get_input_file()?;
+    let raw_lines = read_from_file(&filepath)?;
 
     println!("Found {} lines", raw_lines.len());
 
