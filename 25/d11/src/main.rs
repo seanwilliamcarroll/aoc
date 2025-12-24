@@ -1,15 +1,7 @@
+use common::{RawLines, read_from_file};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{self, BufRead};
 use std::rc::Rc;
-
-type RawLines = Vec<String>;
-
-fn read_from_file(filepath: &str) -> std::io::Result<RawLines> {
-    let file = File::open(filepath)?;
-    io::BufReader::new(file).lines().collect()
-}
 
 const START_NODE_LABEL: &str = "you";
 const SERVER_NODE_LABEL: &str = "svr";

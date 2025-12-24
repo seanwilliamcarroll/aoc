@@ -1,15 +1,7 @@
+use common::{RawLines, read_from_file};
 use std::cell::RefCell;
 use std::collections::{BinaryHeap, HashMap, HashSet};
-use std::fs::File;
-use std::io::{self, BufRead};
 use std::rc::Rc;
-
-type RawLines = Vec<String>;
-
-fn read_from_file(filepath: &str) -> std::io::Result<RawLines> {
-    let file = File::open(filepath)?;
-    io::BufReader::new(file).lines().collect()
-}
 
 #[derive(Debug, Clone)]
 struct Position {
