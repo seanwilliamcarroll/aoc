@@ -47,7 +47,7 @@ impl TreeRegions {
         let mut present = vec![];
 
         let mut present_mode = true;
-        for line in lines.into_iter() {
+        for line in lines {
             if line.contains('x') {
                 present_mode = false;
             }

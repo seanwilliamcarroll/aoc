@@ -126,7 +126,7 @@ impl Graph {
                 &mut sub_graph_1.borrow_mut(),
             )));
 
-            for vertex in (*new_sub_graph).borrow().vertices.clone().into_iter() {
+            for vertex in (*new_sub_graph).borrow().vertices.clone() {
                 self.sub_graphs.remove(&vertex);
                 self.sub_graphs.insert(vertex, Rc::clone(&new_sub_graph));
             }
@@ -144,7 +144,9 @@ impl Graph {
     }
 
     fn sub_graph_sizes(&self) -> HashSet<usize> {
-        self.sub_graphs.values().map(|sub_graph| (*sub_graph).borrow().len())
+        self.sub_graphs
+            .values()
+            .map(|sub_graph| (*sub_graph).borrow().len())
             .collect::<HashSet<usize>>()
     }
 }
@@ -204,7 +206,7 @@ impl Boxes {
         &mut self,
         adjacency_list: Vec<(usize, usize)>,
     ) -> Option<(Position, Position)> {
-        for entry in adjacency_list.into_iter() {
+        for entry in adjacency_list {
             let (pos_0, pos_1) = entry;
             let sub_graph = self.graph.add_edge(pos_0, pos_1);
             if (*sub_graph).borrow().len() == self.positions.len() {
@@ -221,7 +223,9 @@ impl Boxes {
             .into_iter()
             .collect::<Vec<usize>>();
 
-        sizes.sort();
+        // Can use sort_unstable for primitives like usize for faster perf,
+        // with no sort issues
+        sizes.sort_unstable();
 
         sizes.reverse();
 

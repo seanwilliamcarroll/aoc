@@ -61,7 +61,7 @@ impl IndicatorMachine {
             let mut new_buttons: HashSet<Vec<usize>> = HashSet::new();
             // Iterate over the existing elements in the hashset,
             // add index that does not yet appear
-            for element in buttons.into_iter() {
+            for element in buttons {
                 let largest_index = element
                     .last()
                     .expect("We know they all are at least 1 in length");
@@ -209,7 +209,7 @@ fn main() -> std::io::Result<()> {
 
     let p1_solution = indicator_machines
         .iter()
-        .map(|indicator_machine| indicator_machine.fewest_button_presses_for_indicator())
+        .map(IndicatorMachine::fewest_button_presses_for_indicator)
         .sum::<usize>();
 
     println!("P1 Solution: {p1_solution}");
@@ -221,7 +221,7 @@ fn main() -> std::io::Result<()> {
 
     let p2_solution = joltage_machines
         .iter()
-        .map(|joltage_machine| joltage_machine.fewest_button_presses_for_joltage())
+        .map(JoltageMachine::fewest_button_presses_for_joltage)
         .sum::<usize>();
 
     println!("P2 Solution: {p2_solution}");

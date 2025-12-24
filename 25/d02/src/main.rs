@@ -102,9 +102,7 @@ impl Range {
             return 0usize;
         }
 
-        if Self::count_digits(lower_end) != Self::count_digits(upper_end) {
-            panic!("Need to handle this case");
-        }
+        assert!(Self::count_digits(lower_end) == Self::count_digits(upper_end), "Need to handle this case");
 
         let minimum_upper_half = Self::get_upper_half(lower_end);
 

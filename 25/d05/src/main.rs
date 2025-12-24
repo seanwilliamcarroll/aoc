@@ -50,15 +50,15 @@ fn get_ranges_and_ids_from_raw_lines(lines: RawLines) -> (Vec<Range>, Vec<Unit>)
     let mut ids: Vec<Unit> = vec![];
 
     let mut finished_ranges = false;
-    for line in lines.into_iter() {
-        if !finished_ranges {
+    for line in lines {
+        if finished_ranges {
+            ids.push(line.parse::<Unit>().expect("Bad formatting"));
+        } else {
             if line.is_empty() {
                 finished_ranges = true;
                 continue;
             }
             ranges.push(Range::from_line(&line));
-        } else {
-            ids.push(line.parse::<Unit>().expect("Bad formatting"));
         }
     }
     (ranges, ids)
@@ -92,7 +92,7 @@ fn main() -> std::io::Result<()> {
 
     let mut current_range = ranges.remove(0);
 
-    for other_range in ranges.into_iter() {
+    for other_range in ranges {
         if let Some(merged_range) = Range::from_ranges(&current_range, &other_range) {
             current_range = merged_range;
         } else {

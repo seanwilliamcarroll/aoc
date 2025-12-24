@@ -60,19 +60,16 @@ impl TachyonManifold {
             let col_index = *col_index;
             let num_beams = *num_beams;
             let tile = &self.grid[row_index][col_index];
-            match *tile {
-                SPLITTER => {
-                    // Assuming that we don't go off the grid after splitting
-                    self.grid[row_index][col_index - 1] = LASER_LINE;
-                    add_or_initialize(&mut new_columns, col_index - 1, num_beams);
-                    self.grid[row_index][col_index + 1] = LASER_LINE;
-                    add_or_initialize(&mut new_columns, col_index + 1, num_beams);
-                    self.num_beam_splits += 1;
-                }
-                _ => {
-                    self.grid[row_index][col_index] = LASER_LINE;
-                    add_or_initialize(&mut new_columns, col_index, num_beams);
-                }
+            if *tile == SPLITTER {
+                // Assuming that we don't go off the grid after splitting
+                self.grid[row_index][col_index - 1] = LASER_LINE;
+                add_or_initialize(&mut new_columns, col_index - 1, num_beams);
+                self.grid[row_index][col_index + 1] = LASER_LINE;
+                add_or_initialize(&mut new_columns, col_index + 1, num_beams);
+                self.num_beam_splits += 1;
+            } else {
+                self.grid[row_index][col_index] = LASER_LINE;
+                add_or_initialize(&mut new_columns, col_index, num_beams);
             }
         }
 

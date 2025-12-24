@@ -32,7 +32,7 @@ impl MathProblem {
         for (index, line) in lines.into_iter().enumerate() {
             let tokens = line.split_whitespace();
 
-            for token in tokens.into_iter() {
+            for token in tokens {
                 if let Ok(value) = token.parse::<Unit>() {
                     all_nums[index].push(value);
                 } else {
@@ -45,14 +45,14 @@ impl MathProblem {
 
         let mut num_rows: Vec<Vec<Unit>> = vec![vec![]; all_operations.len()];
 
-        for row in all_nums.into_iter() {
+        for row in all_nums {
             for (index, value) in row.into_iter().enumerate() {
                 num_rows[index].push(value);
             }
         }
 
         for (nums, op) in num_rows.into_iter().zip(all_operations.into_iter()) {
-            problems.push(Self { nums, op })
+            problems.push(Self { nums, op });
         }
 
         problems
@@ -93,7 +93,7 @@ impl MathProblem {
         let mut op: Option<Operation> = None;
         let mut nums: Vec<Unit> = vec![];
 
-        for row in new_grid.into_iter() {
+        for row in new_grid {
             let row = row
                 .into_iter()
                 .filter(|character| !character.is_whitespace())
@@ -111,7 +111,7 @@ impl MathProblem {
 
             let digits = row
                 .chars()
-                .filter(|character| character.is_ascii_digit())
+                .filter(char::is_ascii_digit)
                 .collect::<String>();
 
             nums.push(digits.parse::<Unit>().expect("Just checked"));
@@ -145,7 +145,7 @@ fn main() -> std::io::Result<()> {
 
     println!("Found {} problems", problems.len());
 
-    let p1_solution: Unit = problems.iter().map(|prob| prob.solve()).sum::<Unit>();
+    let p1_solution: Unit = problems.iter().map(MathProblem::solve).sum::<Unit>();
 
     println!("P1 Solution: {p1_solution}");
 

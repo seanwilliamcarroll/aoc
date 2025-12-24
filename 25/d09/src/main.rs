@@ -54,7 +54,9 @@ impl CompressedGrid {
             .collect::<HashSet<usize>>()
             .into_iter()
             .collect::<Vec<usize>>();
-        unique_values.sort();
+        // Can use sort_unstable for primitives like usize for faster perf,
+        // with no sort issues
+        unique_values.sort_unstable();
 
         let max_value = unique_values.len();
 

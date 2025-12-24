@@ -43,7 +43,7 @@ impl Graph {
                 let outputs = remaining
                     .trim()
                     .split(' ')
-                    .map(|output| output.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect::<Vec<String>>();
 
                 (label.to_string(), outputs)
@@ -83,10 +83,10 @@ impl Graph {
         let fft_id = *label_to_id.get(FFT_NODE_LABEL).expect("Must have fft");
 
         Self {
-            id_to_node,
             label_to_id,
-            dac_id,
+            id_to_node,
             fft_id,
+            dac_id,
         }
     }
 
@@ -99,7 +99,7 @@ impl Graph {
         memoizer: &mut HashMap<(usize, bool, bool), usize>,
     ) -> usize {
         if id == end_node_id {
-            return if seen_fft && seen_dac { 1usize } else { 0usize };
+            return usize::from(seen_fft && seen_dac);
         }
 
         let seen_fft = seen_fft || id == self.fft_id;
