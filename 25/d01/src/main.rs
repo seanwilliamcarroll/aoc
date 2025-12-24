@@ -32,7 +32,7 @@ impl Turn {
     fn from_raw_lines(raw_lines: RawLines) -> Vec<Self> {
         raw_lines
             .into_iter()
-            .map(|line| Self::from_raw_line(line))
+            .map(Self::from_raw_line)
             .collect::<Vec<Self>>()
     }
 }

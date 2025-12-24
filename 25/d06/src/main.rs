@@ -99,7 +99,7 @@ impl MathProblem {
                 .filter(|character| !character.is_whitespace())
                 .collect::<String>();
 
-            if row.len() == 0 {
+            if row.is_empty() {
                 problems.push(Self {
                     nums: nums.clone(),
                     op: op.expect("Didn't find op!"),
@@ -111,7 +111,7 @@ impl MathProblem {
 
             let digits = row
                 .chars()
-                .filter(|character| character.is_digit(10))
+                .filter(|character| character.is_ascii_digit())
                 .collect::<String>();
 
             nums.push(digits.parse::<Unit>().expect("Just checked"));

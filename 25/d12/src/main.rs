@@ -52,15 +52,13 @@ impl TreeRegions {
                 present_mode = false;
             }
             if present_mode {
-                if line.len() == 0 {
+                if line.is_empty() {
                     presents.push(present.clone());
                     present.clear();
-                } else {
-                    if line.chars().nth(0).expect("Already checked") == '.'
-                        || line.chars().nth(0).expect("Already checked") == '#'
-                    {
-                        present.push(line.chars().collect::<Vec<Tile>>());
-                    }
+                } else if line.chars().nth(0).expect("Already checked") == '.'
+                    || line.chars().nth(0).expect("Already checked") == '#'
+                {
+                    present.push(line.chars().collect::<Vec<Tile>>());
                 }
             } else {
                 tree_areas.push(Packing::from_line(line));

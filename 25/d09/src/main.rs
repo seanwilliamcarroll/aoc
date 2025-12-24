@@ -31,7 +31,7 @@ fn largest_rectangle(positions: &Vec<Position>) -> usize {
             if position_0 == position_1 {
                 continue;
             }
-            let area = position_0.area(&position_1);
+            let area = position_0.area(position_1);
             if area > largest {
                 largest = area;
             }
@@ -69,8 +69,8 @@ impl CompressedGrid {
                 (
                     Position(*a, *b),
                     Position(
-                        *value_to_compressed.get(&a).expect("Must be here"),
-                        *value_to_compressed.get(&b).expect("Must be here"),
+                        *value_to_compressed.get(a).expect("Must be here"),
+                        *value_to_compressed.get(b).expect("Must be here"),
                     ),
                 )
             })
@@ -102,15 +102,15 @@ impl CompressedGrid {
                 let min_val = usize::min(first.1, second.1);
                 let max_val = usize::max(first.1, second.1);
 
-                for tile_index in min_val..max_val {
-                    grid[first.0][tile_index] = 'X';
+                for tile in grid[first.0].iter_mut().take(max_val).skip(min_val) {
+                    *tile = 'X';
                 }
             } else {
                 let min_val = usize::min(first.0, second.0);
                 let max_val = usize::max(first.0, second.0);
 
-                for tile_index in min_val..max_val {
-                    grid[tile_index][first.1] = 'X';
+                for row in grid.iter_mut().take(max_val).skip(min_val) {
+                    row[first.1] = 'X';
                 }
             }
         }
@@ -160,14 +160,14 @@ impl CompressedGrid {
             .compressed_to_original
             .get(&compressed_point_b)
             .expect("Must have it");
-        point_a.area(&point_b)
+        point_a.area(point_b)
     }
 
     fn biggest_red_green_rect(&self) -> usize {
         let positions = self
             .compressed_to_original
             .keys()
-            .map(|val| *val)
+            .copied()
             .collect::<Vec<Position>>();
 
         let mut largest = 0usize;

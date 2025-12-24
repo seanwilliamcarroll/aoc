@@ -52,7 +52,7 @@ fn get_ranges_and_ids_from_raw_lines(lines: RawLines) -> (Vec<Range>, Vec<Unit>)
     let mut finished_ranges = false;
     for line in lines.into_iter() {
         if !finished_ranges {
-            if line.len() == 0 {
+            if line.is_empty() {
                 finished_ranges = true;
                 continue;
             }

@@ -75,7 +75,7 @@ impl Graph {
             let current_node = label_to_node.get(label).expect("Has to be in there");
             for output in outputs {
                 let output_node = label_to_node.get(output).expect("Has to be in there");
-                current_node.borrow_mut().add_output(&output_node);
+                current_node.borrow_mut().add_output(output_node);
             }
         }
 

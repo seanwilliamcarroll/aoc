@@ -32,7 +32,7 @@ impl Range {
 
     fn get_upper_half(value: Unit) -> Unit {
         let digit_count = Self::count_digits(value);
-        assert!(digit_count % 2 == 0);
+        assert!(digit_count.is_multiple_of(2));
         value / Self::ten_to(digit_count / 2)
     }
 
@@ -41,7 +41,7 @@ impl Range {
         F: Fn(Unit) -> Unit,
     {
         let digit_count = Self::count_digits(value);
-        assert!(digit_count % 2 == 0);
+        assert!(digit_count.is_multiple_of(2));
         let each_half = value / Self::ten_to(digit_count / 2);
         let each_half = offset_func(each_half);
         (each_half * Self::ten_to(digit_count / 2)) + each_half
@@ -60,7 +60,7 @@ impl Range {
             return 0usize;
         }
 
-        let lower_digit_count = if lower_digit_count % 2 == 0 {
+        let lower_digit_count = if lower_digit_count.is_multiple_of(2) {
             lower_digit_count
         } else {
             lower_bound = Self::ten_to(lower_digit_count);
@@ -192,7 +192,7 @@ fn main() -> std::io::Result<()> {
 
     let ranges = raw_line
         .split(',')
-        .map(|line| Range::from_line(line))
+        .map(Range::from_line)
         .collect::<Vec<Range>>();
 
     println!("Found {} ranges", ranges.len());

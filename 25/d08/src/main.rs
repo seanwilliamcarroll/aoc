@@ -115,10 +115,10 @@ impl Graph {
         let sub_graph_0 = sub_graph_0.expect("Just added");
         let sub_graph_1 = sub_graph_1.expect("Just added");
 
-        if Rc::ptr_eq(&sub_graph_0, &sub_graph_1) {
+        if Rc::ptr_eq(sub_graph_0, sub_graph_1) {
             // Already the same graph
             sub_graph_0.borrow_mut().add_edge(position_0, position_1);
-            Rc::clone(&sub_graph_0)
+            Rc::clone(sub_graph_0)
         } else {
             // Merge
             let new_sub_graph = Rc::new(RefCell::new(ConnectedGraph::from_connected_graphs(
@@ -144,9 +144,7 @@ impl Graph {
     }
 
     fn sub_graph_sizes(&self) -> HashSet<usize> {
-        self.sub_graphs
-            .iter()
-            .map(|(_, sub_graph)| (*sub_graph).borrow().len())
+        self.sub_graphs.values().map(|sub_graph| (*sub_graph).borrow().len())
             .collect::<HashSet<usize>>()
     }
 }
@@ -254,7 +252,7 @@ fn main() -> std::io::Result<()> {
 
     let largest_n_cir = boxes.largest_n_circuits(3);
 
-    let p1_solution = largest_n_cir.into_iter().fold(1, |acc, value| acc * value);
+    let p1_solution = largest_n_cir.into_iter().product::<usize>();
 
     println!("P1 Solution: {p1_solution}");
 
