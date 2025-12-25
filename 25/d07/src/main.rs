@@ -1,15 +1,11 @@
-use common::{RawLines, get_input_file, read_from_file};
+use common::{Grid, RawLines, Tile, get_input_file, grid_from_raw_lines, read_from_file};
 use std::collections::HashMap;
-
-type Tile = char;
 
 const LASER_LINE: Tile = '|';
 
 const SPLITTER: Tile = '^';
 
 const START_TILE: Tile = 'S';
-
-type Grid = Vec<Vec<Tile>>;
 
 struct TachyonManifold {
     grid: Grid,
@@ -20,10 +16,7 @@ struct TachyonManifold {
 
 impl TachyonManifold {
     fn from_raw_lines(lines: RawLines) -> Self {
-        let grid = lines
-            .into_iter()
-            .map(|line| line.chars().collect::<Vec<Tile>>())
-            .collect::<Grid>();
+        let grid = grid_from_raw_lines(lines);
 
         let starting_column = grid[0]
             .iter()

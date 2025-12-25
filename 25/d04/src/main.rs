@@ -1,20 +1,9 @@
-use common::{RawLines, get_input_file, read_from_file};
-
-type Tile = char;
+use common::{Grid, Tile, get_input_file, grid_from_raw_lines, read_from_file};
 
 const EMPTY_TILE: Tile = '.';
 const ROLL_TILE: Tile = '@';
 
 const MAX_ADJACENT: usize = 3;
-
-type Grid = Vec<Vec<Tile>>;
-
-fn grid_from_raw_lines(lines: RawLines) -> Grid {
-    lines
-        .into_iter()
-        .map(|line| line.chars().collect::<Vec<Tile>>())
-        .collect::<Grid>()
-}
 
 fn count_and_remove_accessible_rolls(grid: &Grid) -> (usize, Grid) {
     let mut count = 0usize;

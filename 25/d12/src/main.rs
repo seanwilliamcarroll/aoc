@@ -1,6 +1,4 @@
-use common::{RawLines, get_input_file, read_from_file};
-
-type Tile = char;
+use common::{RawLines, Tile, get_input_file, read_from_file};
 
 struct Packing {
     dims: (usize, usize),
